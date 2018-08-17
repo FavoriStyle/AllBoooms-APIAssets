@@ -36,6 +36,7 @@ module.exports = class CommentsWidget{
         submit.setAttribute('class', 'comment-input-submit');
         submit.value = dict.submitText;
         // Изменяем поведение кнопки
+        console.log(submit);
         submit.addEventListener('click', async ev => {
             ev.preventDefault();
             if(myComment.value){
