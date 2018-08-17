@@ -22,7 +22,7 @@ module.exports = class CommentsWidget{
         this.conainer.id = `comments-widget-${widgetID}`;
         this.conainer.setAttribute('class', 'allbooms-comments-widget');
         // Создаём элементы
-        const myComment = document.createElement('input'),
+        var myComment = document.createElement('input'),
             submit = document.createElement('input'),
             commentsList = document.createElement('div');
         // Добавляем элементы в контейнер
@@ -51,7 +51,7 @@ module.exports = class CommentsWidget{
         })
         // Периодично запрашиваем новые комментарии
         (() => {
-            function normalizeDate(Date){
+            function normalizeDate(date){
                 return 'вчера'
             }
             function createCommentElement({id, text, user: {id: uid, fullName: uname, avatar: uavatar}, timestamp}){
