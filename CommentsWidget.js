@@ -6,8 +6,13 @@ const APIref = await require(__dirname + '/APIref.js'),
             submitText: 'Отправить',
             submittingText: 'Отправка...',
         }
-    };
-console.log([APIref]);
+    },
+    defaultStyles = `
+div.allbooms-comments-container > .allbooms-single-comment a > img{
+    max-height: 42px;
+    border-radius: 50%;
+}
+`;
 function wait(ms){
     return new Promise(r => setTimeout(r, ms))
 }
@@ -25,17 +30,22 @@ module.exports = class CommentsWidget{
         // Создаём элементы
         var myComment = document.createElement('input'),
             submit = document.createElement('input'),
-            commentsList = document.createElement('div');
+            commentsList = document.createElement('div'),
+            style = document.createElement('style');
         // Добавляем элементы в контейнер
         this.conainer.appendChild(myComment);
         this.conainer.appendChild(submit);
         this.conainer.appendChild(commentsList);
+        this.conainer.appendChild(style);
         // Применяем настройки
         myComment.placeholder = dict.placeholder;
         myComment.setAttribute('class', 'comment-input');
         submit.type = 'submit';
         submit.setAttribute('class', 'comment-input-submit');
         submit.value = dict.submitText;
+        commentsList.setAttribute('class', 'allbooms-comments-container');
+        style.setAttribute('scoped', '');
+        style.innerHTML = defaultStyles + (options.style || '');
         // Изменяем поведение кнопки
         submit.addEventListener('click', async ev => {
             ev.preventDefault();
@@ -54,25 +64,66 @@ module.exports = class CommentsWidget{
             function normalizeDate(date){
                 return 'вчера'
             }
+            class CommentContainer{
+                constructor({id, text, user: {id: uid, fullName: uname, avatar: uavatar}, timestamp}){
+                    const table = document.createElement('table'),
+                        tbody = document.createElement('tbody'),
+                        tr1 = document.createElement('tr'),
+                        tr2 = document.createElement('tr'),
+                        avatarContainer = document.createElement('td'),
+                        userNameContainer = document.createElement('td'),
+                        commentTimeContainer = document.createElement('td'),
+                        commentTextContainer = document.createElement('td'),
+                        userAvatarLink = document.createElement('a'),
+                        userNameLink = document.createElement('a'),
+                        userAvatar = document.createElement('img');
+                    // Собираем таблицу воедино
+                    avatarContainer.setAttribute('rowspan', '2');
+                    commentTextContainer.setAttribute('colspan', '2');
+                    table.appendChild(tbody);
+                    tbody.appendChild(tr1);
+                    tbody.appendChild(tr2);
+                    tr1.appendChild(avatarContainer);
+                    tr1.appendChild(userNameContainer);
+                    tr1.appendChild(commentTimeContainer);
+                    tr2.appendChild(commentTextContainer);
+                    // Вносим реальные контейнеры в таблицу
+                    avatarContainer.appendChild(userAvatarLink);
+                    userAvatarLink.appendChild(userAvatar);
+                    userNameContainer.appendChild(userNameLink);
+                    // Вносим данные
+                    userAvatar.setAttribute('src', uavatar);
+                    userAvatarLink.setAttribute('href', `https://${APIref.baseHost}/${uid}`);
+                    userNameLink.setAttribute('href', `https://${APIref.baseHost}/${uid}`);
+                    userNameLink.innerText = uname;
+                    commentTimeContainer.innerText = normalizeDate(new Date(timestamp * 1000));
+                    commentTextContainer.innerText = text;
+                    // Помечаем элементы
+                    table.setAttribute('class', 'allbooms-single-comment');
+                    return table;
+                }
+            }
             function createCommentElement({id, text, user: {id: uid, fullName: uname, avatar: uavatar}, timestamp}){
                 const userAvatar = document.createElement('img'),
-                    userName = document.createElement('a'),
+                    userLink = document.createElement('a'),
+                    userName = document.createElement('span'),
                     commentText = document.createElement('p'),
                     commentTime = document.createElement('span'),
                     container = document.createElement('div');
                 userAvatar.setAttribute('src', uavatar);
-                userName.setAttribute('href', `https://${APIref.baseHost}/${uid}`);
+                userLink.setAttribute('href', `https://${APIref.baseHost}/${uid}`);
                 userName.innerText = uname;
                 commentText.innerText = text;
                 commentTime.innerText = normalizeDate(new Date(timestamp * 1000));
-                container.appendChild(userAvatar);
-                container.appendChild(userName);
+                container.setAttribute('class', 'allbooms-single-comment');
+                container.appendChild(userLink);
                 container.appendChild(commentTime);
                 container.appendChild(commentText);
+                userLink.appendChild(userAvatar);
+                userLink.appendChild(userName);
                 return container
             }
             function updateContainer(toPrepend){
-                console.log(toPrepend);
                 toPrepend.forEach(element => {
                     element = createCommentElement(element);
                     if(commentsList.firstElementChild){
@@ -87,12 +138,14 @@ module.exports = class CommentsWidget{
                     var toPrepend = [];
                     for(var i = 0; i < tagretArray.length; i++){
                         if(tagretArray[i].id != (this[0] || {}).id) toPrepend.push(tagretArray[i]); else {
-                            updateContainer(toPrepend.reverse());
-                            return this.unshift(...toPrepend.reverse())
+                            toPrepend = toPrepend.reverse();
+                            updateContainer(toPrepend);
+                            return this.unshift(...toPrepend)
                         }
                     }
-                    updateContainer(toPrepend.reverse());
-                    return this.unshift(...toPrepend.reverse())
+                    toPrepend = toPrepend.reverse();
+                    updateContainer(toPrepend);
+                    return this.unshift(...toPrepend)
                 }
             };
             (async function requestComments(){
