@@ -1,15 +1,18 @@
-module.exports = class APIRefference{
+class APIRefference{
     constructor(){
         class Method{
             constructor(iface, method){
                 return new Proxy(data => {
                     return new Promise((resolve, reject) => {
                         var xhr = new XMLHttpRequest;
-                        xhr.open('POST', `https://api.allbooms.com/${iface}.${method}`, true);
-                        xhr.setRequestHeader('Content-type', 'application/json; charset=utf-8');
+                        xhr.open('POST', `https://api.${APIRefference.baseHost}/${iface}.${method}`, true);
+                        xhr.setRequestHeader('Content-type', 'application/json');
                         xhr.onreadystatechange = () => {
                             if (xhr.readyState != 4) return;
-                            if (xhr.status != 200) reject(new Error(xhr.status + ': ' + xhr.statusText)); else resolve(JSON.parse(xhr.responseText))
+                            if (xhr.status != 200) reject(new Error(xhr.status + ': ' + xhr.statusText)); else {
+                                let result = JSON.parse(xhr.responseText);
+                                if(!result.error) resolve(result.result); else reject(new Error(result.error))
+                            }
                         };
                         xhr.send(JSON.stringify(data));
                     })
@@ -34,3 +37,5 @@ module.exports = class APIRefference{
         })
     }
 }
+APIRefference.baseHost = 'allbooms.com';
+module.exports = APIRefference;

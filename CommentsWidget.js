@@ -1,4 +1,5 @@
-const API = await require(__dirname + '/APIref.js'),
+const APIref = await require(__dirname + '/APIref.js'),
+    API = new APIref,
     dictionary = {
         'ru': {
             placeholder: 'Ваш комментарий',
@@ -6,7 +7,7 @@ const API = await require(__dirname + '/APIref.js'),
             submittingText: 'Отправка...',
         }
     };
-
+console.log([APIref]);
 function wait(ms){
     return new Promise(r => setTimeout(r, ms))
 }
@@ -36,7 +37,6 @@ module.exports = class CommentsWidget{
         submit.setAttribute('class', 'comment-input-submit');
         submit.value = dict.submitText;
         // Изменяем поведение кнопки
-        console.log([submit, submit.addEventListener]);
         submit.addEventListener('click', async ev => {
             ev.preventDefault();
             if(myComment.value){
@@ -48,7 +48,7 @@ module.exports = class CommentsWidget{
                 });
                 submit.value = dict.submitText;
             }
-        })
+        });
         // Периодично запрашиваем новые комментарии
         (() => {
             function normalizeDate(date){
@@ -61,7 +61,7 @@ module.exports = class CommentsWidget{
                     commentTime = document.createElement('span'),
                     container = document.createElement('div');
                 userAvatar.setAttribute('src', uavatar);
-                userName.setAttribute('href', `${API.baseHost}/${uid}`);
+                userName.setAttribute('href', `https://${APIref.baseHost}/${uid}`);
                 userName.innerText = uname;
                 commentText.innerText = text;
                 commentTime.innerText = normalizeDate(new Date(timestamp * 1000));
@@ -72,17 +72,27 @@ module.exports = class CommentsWidget{
                 return container
             }
             function updateContainer(toPrepend){
-                toPrepend.forEach(element => commentsList.insertBefore(createCommentElement(element), commentsList.firstElementChild))
+                console.log(toPrepend);
+                toPrepend.forEach(element => {
+                    element = createCommentElement(element);
+                    if(commentsList.firstElementChild){
+                        commentsList.insertBefore(element, commentsList.firstElementChild)
+                    } else {
+                        commentsList.appendChild(element)
+                    }
+                })
             }
             const comments = new class extends Array{
                 prependNew(tagretArray){
                     var toPrepend = [];
                     for(var i = 0; i < tagretArray.length; i++){
-                        if(tagretArray[i].id != this[0].id) toPrepend.push(tagretArray[i]); else {
-                            updateContainer(toPrepend);
-                            return this.unshift(...toPrepend)
+                        if(tagretArray[i].id != (this[0] || {}).id) toPrepend.push(tagretArray[i]); else {
+                            updateContainer(toPrepend.reverse());
+                            return this.unshift(...toPrepend.reverse())
                         }
                     }
+                    updateContainer(toPrepend.reverse());
+                    return this.unshift(...toPrepend.reverse())
                 }
             };
             (async function requestComments(){
@@ -90,10 +100,10 @@ module.exports = class CommentsWidget{
                     app_id: appID,
                     widget_id: widgetID,
                 })));
-                comments.updateContainer();
                 await wait(2000);
                 requestComments();
             })()
         })();
+        return this.conainer
     }
 }
