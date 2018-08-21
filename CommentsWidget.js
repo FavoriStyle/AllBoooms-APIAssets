@@ -8,9 +8,28 @@ const APIref = await require(__dirname + '/APIref.js'),
         }
     },
     defaultStyles = `
-div.allbooms-comments-container > .allbooms-single-comment a > img{
+.allbooms-single-comment {
+    width: 100%;
+}
+.allbooms-single-comment a > img{
     max-height: 42px;
     border-radius: 50%;
+}
+.allbooms-single-comment tr:first-child > td:first-child{
+    width: 42px;
+    vertical-align: top;
+}
+.allbooms-single-comment tr:first-child > td:last-child{
+    width: 160px;
+}
+.allbooms-single-comment tr:first-child > td:nth-of-child(2){
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+.allbooms-single-comment tr:first-child > td:nth-of-child(2) > a{
+    width: 1px;
+    display: inline-block;
 }
 `;
 function wait(ms){
@@ -103,49 +122,33 @@ module.exports = class CommentsWidget{
                     return table;
                 }
             }
-            function createCommentElement({id, text, user: {id: uid, fullName: uname, avatar: uavatar}, timestamp}){
-                const userAvatar = document.createElement('img'),
-                    userLink = document.createElement('a'),
-                    userName = document.createElement('span'),
-                    commentText = document.createElement('p'),
-                    commentTime = document.createElement('span'),
-                    container = document.createElement('div');
-                userAvatar.setAttribute('src', uavatar);
-                userLink.setAttribute('href', `https://${APIref.baseHost}/${uid}`);
-                userName.innerText = uname;
-                commentText.innerText = text;
-                commentTime.innerText = normalizeDate(new Date(timestamp * 1000));
-                container.setAttribute('class', 'allbooms-single-comment');
-                container.appendChild(userLink);
-                container.appendChild(commentTime);
-                container.appendChild(commentText);
-                userLink.appendChild(userAvatar);
-                userLink.appendChild(userName);
-                return container
-            }
-            function updateContainer(toPrepend){
-                toPrepend.forEach(element => {
-                    element = createCommentElement(element);
-                    if(commentsList.firstElementChild){
-                        commentsList.insertBefore(element, commentsList.firstElementChild)
-                    } else {
-                        commentsList.appendChild(element)
+            const CommentsList = new class extends Array{
+                constructor(){
+                    super();
+                    this.ids = []
+                }
+                add(elem){
+                    if(this.ids.indexOf(elem.id) == -1){
+                        this.push(elem);
+                        this.ids.push(elem.id);
+                        return elem
                     }
-                })
+                }
+            }
+            function updateContainer(element){
+                element = new CommentContainer(element);
+                if(commentsList.firstElementChild){
+                    commentsList.insertBefore(element, commentsList.firstElementChild)
+                } else {
+                    commentsList.appendChild(element)
+                }
             }
             const comments = new class extends Array{
-                prependNew(tagretArray){
-                    var toPrepend = [];
-                    for(var i = 0; i < tagretArray.length; i++){
-                        if(tagretArray[i].id != (this[0] || {}).id) toPrepend.push(tagretArray[i]); else {
-                            toPrepend = toPrepend.reverse();
-                            updateContainer(toPrepend);
-                            return this.unshift(...toPrepend)
-                        }
-                    }
-                    toPrepend = toPrepend.reverse();
-                    updateContainer(toPrepend);
-                    return this.unshift(...toPrepend)
+                prependNew(tagretArray = []){
+                    tagretArray.reverse().forEach(elem => {
+                        elem = CommentsList.add(elem);
+                        if(elem) updateContainer(elem);
+                    })
                 }
             };
             (async function requestComments(){
