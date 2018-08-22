@@ -9,7 +9,10 @@ const APIref = await require(__dirname + '/APIref.js'),
     },
     defaultStyles = `
 @import url('https://fonts.googleapis.com/css?family=Roboto');
-.allbooms-single-comment {
+.allbooms-comments-widget{
+    width: 280px;
+}
+.allbooms-single-comment{
     width: 100%;
 }
 .allbooms-single-comment a > img{
@@ -21,7 +24,8 @@ const APIref = await require(__dirname + '/APIref.js'),
     vertical-align: top;
 }
 .allbooms-single-comment tr:first-child > td:last-child{
-    width: 160px;
+    width: 55px;
+    text-align: right;
 }
 .allbooms-single-comment tr:first-child > td:nth-child(2){
     white-space: nowrap;
@@ -35,6 +39,22 @@ const APIref = await require(__dirname + '/APIref.js'),
 .allbooms-comments-widget *{
     font-size: 12px;
     font-family: 'Roboto', sans-serif;
+}
+.allbooms-comments-widget .comment-input-submit{
+    float: right;
+    width: 80px;
+    border: 0;
+    background: transparent;
+}
+.allbooms-comments-widget .comment-input{
+    width: calc(100% - 80px);
+    border: 0;
+    border-bottom: 2px solid darkgrey;
+    transition: 1s;
+}
+.allbooms-comments-widget .comment-input:focus{
+    outline: none;
+    border-bottom-color: #00b1b3;
 }
 `;
 function wait(ms){
