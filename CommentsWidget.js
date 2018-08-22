@@ -74,6 +74,28 @@ function addDefaultStyle(){
         document.head.appendChild(style)
     }
 }
+const UserController = (() => {
+    var cache = {
+        me: {
+            id: '0TksO20JRaX4jP9sACjL0HosH0l1',
+            fullName: 'Влад <KaMeHb> Марченко',
+            avatar: 'https://firebasestorage.googleapis.com/v0/b/social-net-test.appspot.com/o/images%2F77576c58-a824-467c-a688-5f8d2140bbc8.jpg?alt=media&token=a8d732ff-1e90-4bc2-868c-32b42439b594'
+        }
+    };
+    return class UserController{
+        static async getMe(){
+            if(!cache.me){
+                let udata = await API.user.getInfo([
+                    'id',
+                    'fullName',
+                    'avatar'
+                ]);
+                cache.me = udata
+            }
+            return cache.me
+        }
+    }
+})();
 
 module.exports = class CommentsWidget{
     constructor(appID, widgetID, options){
@@ -81,7 +103,20 @@ module.exports = class CommentsWidget{
         options = Object.assign({
             lang: 'ru'
         }, options);
-        const dict = Object.assign(dictionary[options.lang], options.strings);
+        const dict = Object.assign(dictionary[options.lang], options.strings),
+            CommentsList = new class extends Array{
+                constructor(){
+                    super();
+                    this.ids = []
+                }
+                add(elem){
+                    if(this.ids.indexOf(elem.id) == -1){
+                        this.push(elem);
+                        this.ids.push(elem.id);
+                        return elem
+                    }
+                }
+            };
         // Создаём контейнер
         this.conainer = document.createElement('div');
         this.conainer.id = `comments-widget-${widgetID}`;
@@ -109,13 +144,21 @@ module.exports = class CommentsWidget{
         submit.addEventListener('click', async ev => {
             ev.preventDefault();
             if(myComment.value){
+                submit.setAttribute('disabled', '');
                 submit.value = dict.submittingText;
-                await API.comments.external.add({
+                let {id, timestamp} = await API.comments.external.add({
                     token: "`3\\M`Yo'&9I+'sN&W%G\"ldxGAtE+LJMyc.8ngRY!j=i!'|Q35^'\"wW*5g)D\"WfC@",
                     widget_id: widgetID,
                     text: myComment.value,
                 });
+                CommentsList.add({
+                    id,
+                    timestamp,
+                    user: await UserController.getMe(),
+                    text: myComment.value
+                });
                 submit.value = dict.submitText;
+                submit.removeAttribute('disabled')
             }
         });
         // Периодично запрашиваем новые комментарии
@@ -160,19 +203,6 @@ module.exports = class CommentsWidget{
                     // Помечаем элементы
                     table.setAttribute('class', 'allbooms-single-comment');
                     return table;
-                }
-            }
-            const CommentsList = new class extends Array{
-                constructor(){
-                    super();
-                    this.ids = []
-                }
-                add(elem){
-                    if(this.ids.indexOf(elem.id) == -1){
-                        this.push(elem);
-                        this.ids.push(elem.id);
-                        return elem
-                    }
                 }
             }
             function updateContainer(element){
