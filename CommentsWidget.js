@@ -56,6 +56,11 @@ const APIref = await require(__dirname + '/APIref.js'),
     outline: none;
     border-bottom-color: #00b1b3;
 }
+.allbooms-comments-container{
+    margin-top: 10px;
+    max-height: 400px;
+    overflow-y: auto;
+}
 `;
 function wait(ms){
     return new Promise(r => setTimeout(r, ms))
