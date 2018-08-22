@@ -8,6 +8,7 @@ const APIref = await require(__dirname + '/APIref.js'),
         }
     },
     defaultStyles = `
+@import url('https://fonts.googleapis.com/css?family=Roboto');
 .allbooms-single-comment {
     width: 100%;
 }
@@ -22,22 +23,36 @@ const APIref = await require(__dirname + '/APIref.js'),
 .allbooms-single-comment tr:first-child > td:last-child{
     width: 160px;
 }
-.allbooms-single-comment tr:first-child > td:nth-of-child(2){
+.allbooms-single-comment tr:first-child > td:nth-child(2){
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
 }
-.allbooms-single-comment tr:first-child > td:nth-of-child(2) > a{
+.allbooms-single-comment tr:first-child > td:nth-child(2) > a{
     width: 1px;
     display: inline-block;
+}
+.allbooms-comments-widget *{
+    font-size: 12px;
+    font-family: 'Roboto', sans-serif;
 }
 `;
 function wait(ms){
     return new Promise(r => setTimeout(r, ms))
 }
+function addDefaultStyle(){
+    var def = document.querySelector('style[name="allbooms-comments-default"]');
+    if(!def){
+        let style = document.createElement('style');
+        style.innerHTML = defaultStyles;
+        style.setAttribute('name', 'allbooms-comments-default');
+        document.head.appendChild(style)
+    }
+}
 
 module.exports = class CommentsWidget{
     constructor(appID, widgetID, options){
+        addDefaultStyle();
         options = Object.assign({
             lang: 'ru'
         }, options);
@@ -64,7 +79,7 @@ module.exports = class CommentsWidget{
         submit.value = dict.submitText;
         commentsList.setAttribute('class', 'allbooms-comments-container');
         style.setAttribute('scoped', '');
-        style.innerHTML = defaultStyles + (options.style || '');
+        style.innerHTML = options.style || '';
         // Изменяем поведение кнопки
         submit.addEventListener('click', async ev => {
             ev.preventDefault();
