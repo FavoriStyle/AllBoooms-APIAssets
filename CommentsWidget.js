@@ -151,18 +151,19 @@ module.exports = class CommentsWidget{
                     widget_id: widgetID,
                     text: myComment.value,
                 });
-                CommentsList.add({
+                var myComment = CommentsList.add({
                     id,
                     timestamp,
                     user: await UserController.getMe(),
                     text: myComment.value
                 });
+                if(myComment) updateContainer(myComment);
                 submit.value = dict.submitText;
                 submit.removeAttribute('disabled')
             }
         });
         // Периодично запрашиваем новые комментарии
-        (() => {
+        const updateContainer = (() => {
             function normalizeDate(date){
                 return 'вчера'
             }
@@ -205,14 +206,6 @@ module.exports = class CommentsWidget{
                     return table;
                 }
             }
-            function updateContainer(element){
-                element = new CommentContainer(element);
-                if(commentsList.firstElementChild){
-                    commentsList.insertBefore(element, commentsList.firstElementChild)
-                } else {
-                    commentsList.appendChild(element)
-                }
-            }
             const comments = new class extends Array{
                 prependNew(tagretArray = {comments:[]}){
                     tagretArray.comments.reverse().forEach(elem => {
@@ -229,7 +222,15 @@ module.exports = class CommentsWidget{
                 })));
                 await wait(2000);
                 requestComments();
-            })()
+            })();
+            return function updateContainer(element){
+                element = new CommentContainer(element);
+                if(commentsList.firstElementChild){
+                    commentsList.insertBefore(element, commentsList.firstElementChild)
+                } else {
+                    commentsList.appendChild(element)
+                }
+            }
         })();
         return this.conainer
     }
