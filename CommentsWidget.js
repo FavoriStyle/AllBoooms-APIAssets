@@ -214,8 +214,9 @@ module.exports = class CommentsWidget{
                 }
             }
             const comments = new class extends Array{
-                prependNew(tagretArray = []){
-                    tagretArray.reverse().forEach(elem => {
+                prependNew(tagretArray = {comments:[]}){
+                    tagretArray.comments.reverse().forEach(elem => {
+                        elem.user = tagretArray.users[elem.userid];
                         elem = CommentsList.add(elem);
                         if(elem) updateContainer(elem);
                     })
