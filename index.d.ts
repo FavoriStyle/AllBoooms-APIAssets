@@ -32,6 +32,12 @@ declare namespace API{
             length: Number,
             videoType: 'direct' | 'youtube',
         }>;
+        interface UserList{
+            [key: String]: {
+                fullName: String,
+                avatar: String,
+            }
+        };
         return class APIReference{
             messages: {
                 chats: {
@@ -80,6 +86,58 @@ declare namespace API{
                     forAnyone?: Boolean,
                 }):Promise<true>,
             };
+            comments: {
+                external: {
+                    list(args: {
+                        app_id: String,
+                        widget_id: String,
+                    }):Promise<{
+                        comments: Array<{
+                            id: String,
+                            text: String,
+                            userid: String,
+                            timestamp: Number,
+                        }>,
+                        users: UserList,
+                    }>,
+                    add(args: {
+                        token: String,
+                        widget_id: String,
+                        text: String,
+                    }):Promise<{
+                        id: String,
+                        timestamp: Number,
+                    }>,
+                }
+            };
+            user: {
+                getInfo(args: {
+                    token: String,
+                    list: Array<
+                        'avatar'
+                      | 'email'
+                      | 'fullName'
+                      | 'id'
+                      | 'tagLine'
+                      | 'banner'
+                      | 'birthday'
+                      | 'companyName'
+                      | 'twitterId'
+                      | 'webUrl'
+                    >,
+                }):Promise<{
+                    avatar?: String,
+                    email?: String,
+                    fullName?: String,
+                    id?: String,
+                    tagLine?: String,
+                    banner?: String,
+                    birthday?: Number,
+                    companyName?: String,
+                    twitterId?: String,
+                    webUrl?: String,
+                }>,
+            }
             static baseHost:String;
         }
     })();
