@@ -144,3 +144,4 @@ declare namespace API{
 declare type DateNormalizator = (date: Number) => String
 declare type AsyncWait = (ms: Number) => void
 declare type HTTP = { get(url: String): Promise<String>, post(url: String, data: any, contentType?: String): Promise<String> }
+declare type Cookies = { get(name: String): String | undefined, set(name: String, value: String, options: {expires: Number}): void, del(name: String): void }
