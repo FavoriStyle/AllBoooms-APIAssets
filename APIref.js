@@ -5,7 +5,7 @@ class APIReference{
                 return new Proxy(data => {
                     return new Promise((resolve, reject) => {
                         var xhr = new XMLHttpRequest;
-                        xhr.open('POST', `https://api.${APIRefference.baseHost}/${iface}.${method}`, true);
+                        xhr.open('POST', `https://api.${APIReference.baseHost}/${iface}.${method}`, true);
                         xhr.setRequestHeader('Content-type', 'application/json');
                         xhr.onreadystatechange = () => {
                             if (xhr.readyState != 4) return;
@@ -36,6 +36,6 @@ class APIReference{
             }
         })
     }
-    static baseHost = 'allbooms.com';
 }
+APIReference.baseHost = 'allbooms.com';
 module.exports = APIReference;
