@@ -141,3 +141,6 @@ declare namespace API{
         static baseHost:String;
     }
 }
+declare type DateNormalizator = (date: Number) => String
+declare type AsyncWait = (ms: Number) => void
+declare type HTTP = {get(url:String):Promise<String>, post(url:String, data:any, contentType?:String):Promise<String>}
