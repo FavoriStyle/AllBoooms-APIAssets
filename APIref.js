@@ -1,4 +1,4 @@
-class APIRefference{
+class APIReference{
     constructor(){
         class Method{
             constructor(iface, method){
@@ -36,6 +36,6 @@ class APIRefference{
             }
         })
     }
+    static baseHost = 'allbooms.com';
 }
-APIRefference.baseHost = 'allbooms.com';
-module.exports = APIRefference;
+module.exports = APIReference;
