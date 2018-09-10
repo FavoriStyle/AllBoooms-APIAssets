@@ -39,7 +39,7 @@ exports.http = {
 /**
  * @type {Cookies}
  */
-exports.Cookies = {
+var Cookies = {
     get: name => {
         var matches = document.cookie.match(new RegExp(
             "(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"
@@ -69,8 +69,9 @@ exports.Cookies = {
         document.cookie = updatedCookie;
     },
     del: name => {
-        this.set(name, "", {
+        Cookies.set(name, "", {
             expires: -1
         })
     }
 }
+exports.Cookies = Cookies;
