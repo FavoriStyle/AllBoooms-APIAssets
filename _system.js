@@ -75,3 +75,10 @@ var Cookies = {
     }
 }
 exports.Cookies = Cookies;
+exports.Link = {
+    addParam(url, key, value){
+        var _ = url.split('#'), splitter = '&';
+        if(_[0].split('?').length == 1) splitter = '?';
+        return `${_[0]}${splitter}${encodeURIComponent(key)}=${encodeURIComponent(value)}${_[1] ? `#${_[1]}` : ''}`;
+    }
+}
