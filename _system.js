@@ -1,15 +1,15 @@
 /**
- * @type {DateNormalizator}
+ * @type {_system.DateNormalizator}
  */
 exports.normalizeDate = date => {
     return 'вчера'
 };
 /**
- * @type {AsyncWait}
+ * @type {_system.AsyncWait}
  */
 exports.wait = ms => new Promise(r => setTimeout(r, ms));
 /**
- * @type {HTTP}
+ * @type {_system.HTTP}
  */
 exports.http = {
     get(url){
@@ -37,7 +37,7 @@ exports.http = {
     }
 };
 /**
- * @type {Cookies}
+ * @type {_system.Cookies}
  */
 var Cookies = {
     get: name => {
@@ -75,6 +75,9 @@ var Cookies = {
     }
 }
 exports.Cookies = Cookies;
+/**
+ * @type {_system.Link}
+ */
 exports.Link = {
     addParam(url, key, value){
         var _ = url.split('#'), splitter = '&';
@@ -82,3 +85,12 @@ exports.Link = {
         return `${_[0]}${splitter}${encodeURIComponent(key)}=${encodeURIComponent(value)}${_[1] ? `#${_[1]}` : ''}`;
     }
 }
+exports.ExtString = class ExtString extends String{
+    reverse(){
+        var newString = "";
+        for (var i = this.length - 1; i >= 0; i--) {
+            newString += this[i];
+        }
+        return new ExtString(newString);
+    }
+};
