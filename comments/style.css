@@ -1,4 +1,20 @@
 @import url('https://fonts.googleapis.com/css?family=Roboto');
+@import url('https://cdn.jsdelivr.net/gh/FavoriStyle/AllBooms-brand-icons@2.0.0-1+pre/dist/allbooms-brand-icons.css');
+:root{
+    --theme-color: #00b1b3;
+    --highlighted-text-color: #ffffff;
+}
+[class^="allbooms-brand-icon-"]:before, [class*=" allbooms-brand-icon-"]:before{
+    font-family: 'AllBooms brand icons', 'allbooms-brand-icons' !important;
+    speak: none;
+    font-style: normal;
+    font-weight: normal;
+    font-variant: normal;
+    text-transform: none;
+    line-height: 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
 .allbooms-comments-widget{
     width: 280px;
 }
@@ -44,10 +60,15 @@
 }
 .allbooms-comments-widget .comment-input:focus{
     outline: none;
-    border-bottom-color: #00b1b3;
+    border-bottom-color: var(--theme-color);
 }
 .allbooms-comments-container{
     margin-top: 10px;
     max-height: 400px;
     overflow-y: auto;
+}
+.allbooms-comments-widget .comment-input-submit.login-highlight{
+    background-color: var(--theme-color);
+    color: var(--highlighted-text-color);
+    border-bottom: 2px solid var(--theme-color);
 }

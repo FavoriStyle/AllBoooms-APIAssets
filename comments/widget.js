@@ -3,7 +3,7 @@ module.exports = await (async () => {
     // re-usable (cached) promise
     const getDefinitions = (() => {
         const definitions = (async () => {
-            const { APIref, API: _API, defaultStyles, currentUser, normalizeDate, http, wait } = await (
+            const { APIref, API: _API, defaultStyles, currentUser, normalizeDate, http, wait, ExtString } = await (
                 /**
                  * @typedef UserDefinition
                  * @prop {String} id
@@ -16,51 +16,52 @@ module.exports = await (async () => {
                  * @property {typeof API.Reference} APIref
                  * @property {API.Reference} API
                  * @property {String} defaultStyles
-                 * @property {UserDefinition} currentUser
-                 * @property {DateNormalizator} normalizeDate
-                 * @property {HTTP} http
-                 * @property {AsyncWait} wait
+                 * @property {UserDefinition | null} currentUser
+                 * @property {_system.DateNormalizator} normalizeDate
+                 * @property {_system.HTTP} http
+                 * @property {_system.AsyncWait} wait
+                 * @property {typeof _system.ExtString} ExtString
                  */
                 /**
                  * @return {Promise<Response>}
                  */
                 async () => {
                     const [
-                        { _system: { normalizeDate, wait, http }, defaultStyles },
+                        { _system: { normalizeDate, wait, http, ExtString }, defaultStyles },
                         { APIref, API, currentUser },
-                    ] = await Promise.all([
-                        // Independent threads
-                        (async () => {
-                            const _system = await require(__dirname + '/../_system.min.js');
-                            return {
-                                _system,
-                                defaultStyles: await _system.http.get(__dirname + '/style.css')
-                            }
-                        })(),
-                        (async () => {
-                            const APIref = await require(__dirname + '/../APIref.min.js'),
-                                API = new APIref;
-                            return {
-                                APIref,
-                                API,
-                                currentUser:
-                                /*
-                                await API.user.getInfo([
-                                    'id',
-                                    'fullName',
-                                    'avatar',
-                                ])
-                                /*/
-                                {
-                                    id: '0TksO20JRaX4jP9sACjL0HosH0l1',
-                                    fullName: 'Влад <KaMeHb> Марченко',
-                                    avatar: 'https://firebasestorage.googleapis.com/v0/b/social-net-test.appspot.com/o/images%2F77576c58-a824-467c-a688-5f8d2140bbc8.jpg?alt=media&token=a8d732ff-1e90-4bc2-868c-32b42439b594',
-                                    _token: "`3\\M`Yo'&9I+'sN&W%G\"ldxGAtE+LJMyc.8ngRY!j=i!'|Q35^'\"wW*5g)D\"WfC@"
+                    ] = await (async () => {
+                        const _system = require(__dirname + '/../_system.min.js');
+                        return await Promise.all([
+                            // Independent threads
+                            (async () => {
+                                const _ = await _system;
+                                return {
+                                    _system: _,
+                                    defaultStyles: await _.http.get(__dirname + '/style.css')
                                 }
-                                //*/
-                            }
-                        })(),
-                    ]);
+                            })(),
+                            (async () => {
+                                const APIref = await require(__dirname + '/../APIref.min.js'),
+                                    API = new APIref,
+                                    // _system is not an initiator but Promise itself, so MAY be used without Promise.all in parallel way
+                                    token = (await _system).Cookies.get('allbooms_token');
+                                var res = {
+                                    APIref,
+                                    API,
+                                    currentUser: token ? await API.user.getInfo({
+                                        token,
+                                        list: [
+                                            'id',
+                                            'fullName',
+                                            'avatar',
+                                        ]
+                                    }) : {},
+                                };
+                                if(!res.currentUser.id) res.currentUser = null; else res.currentUser._token = token;
+                                return res
+                            })(),
+                        ]);
+                    })();
                     return {
                         APIref,
                         API,
@@ -69,6 +70,7 @@ module.exports = await (async () => {
                         normalizeDate,
                         wait,
                         http,
+                        ExtString,
                     }
                 }
             )();
@@ -77,23 +79,26 @@ module.exports = await (async () => {
                 API: _API,
                 defaultStyles,
                 dictionary: {
-                    'ru': {
+                    ru: {
                         placeholder: 'Ваш комментарий',
                         submitText: 'Отправить',
                         submittingText: 'Отправка...',
+                        userNotLogged: 'Для добавления комментария',
+                        login: 'Войдите',
                     }
                 },
                 http,
                 wait,
                 currentUser,
                 normalizeDate,
+                String: ExtString,
             }
         })();
         return () => definitions
     })();
     // wrapper to not to lost JSDoc Context
     return await (async () => {
-        const { APIref, API, dictionary, wait, normalizeDate, currentUser } = await getDefinitions();
+        const { APIref, API, dictionary, wait, normalizeDate, currentUser, String } = await getDefinitions();
         /*-----------------------------*\
         | Adding stylesheet to the page |
         \*-----------------------------*/
@@ -215,7 +220,7 @@ module.exports = await (async () => {
                 this.conainer.setAttribute('class', 'allbooms-comments-widget');
                 // Создаём элементы
                 var myComment = document.createElement('input'),
-                    submit = document.createElement('input'),
+                    submit = document.createElement('button'),
                     commentsList = document.createElement('div'),
                     style = document.createElement('style');
                 // Добавляем элементы в контейнер
@@ -228,14 +233,23 @@ module.exports = await (async () => {
                 myComment.setAttribute('class', 'comment-input');
                 submit.type = 'submit';
                 submit.setAttribute('class', 'comment-input-submit');
-                submit.value = dict.submitText;
+                submit.innerText = dict.submitText;
                 commentsList.setAttribute('class', 'allbooms-comments-container');
                 style.setAttribute('scoped', '');
                 style.innerHTML = options.style || '';
+                if(!currentUser){
+                    myComment.placeholder = dict.userNotLogged;
+                    myComment.setAttribute('disabled', '');
+                    submit.innerText = dict.login;
+                    submit.innerHTML = submit.innerHTML + ' <i class="allbooms-brand-icon-allbooms"></i>';
+                    submit.classList.add('login-highlight');
+                }
                 // Изменяем поведение кнопки
                 submit.addEventListener('click', async ev => {
                     ev.preventDefault();
-                    if(myComment.value){
+                    if(!currentUser){
+                        window.location.href = `https://allbooms.com/getToken?callback=https%3A%2F%2Fapi.allbooms.com%2Fdev%2Fblank.html&appid=lSgmGGAVrVta3X9xeO3D1`;
+                    } else if(myComment.value){
                         submit.setAttribute('disabled', '');
                         submit.value = dict.submittingText;
                         let {id, timestamp} = await API.comments.external.add({
