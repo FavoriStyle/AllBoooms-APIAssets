@@ -95,7 +95,7 @@ exports.Link = class Link{
         this[LinkInternalElement].search.slice(1).split('&').forEach(_ => {
             if(_ == '') return;
             _ = _.split('=');
-            this[LinkInternalParams][decodeURIComponent(_[0])] = decodeURIComponent(_[1]);
+            this[LinkInternalParams][decodeURIComponent(_[0])] = decodeURIComponent(_[1] || '');
         });
     }
     get params(){
