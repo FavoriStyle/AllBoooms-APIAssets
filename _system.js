@@ -104,7 +104,12 @@ exports.Link = class Link{
                 target[name] = value;
                 _this.params = target;
                 return true
-            }
+            },
+            deleteProperty(target, name){
+                delete target[name];
+                _this.params = target;
+                return true
+            },
         })
     }
     set params(params){
