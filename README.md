@@ -1,5 +1,6 @@
 # APIAssets
 [![](https://img.shields.io/badge/KaMeHb__UA-Telegram-%230088cc.svg?longCache=true&style=flat-square)](https://t.me/KaMeHb_UA)
+[![](https://data.jsdelivr.com/v1/package/gh/FavoriStyle/AllBoooms-APIAssets/badge)](https://www.jsdelivr.com/package/gh/FavoriStyle/AllBoooms-APIAssets)
 
 ## Описание
 Репозиторий содержит реализацию работы с [API](https://api.allbooms.com/dev/) сайта [allbooms.com](https://allbooms.com). Код предоставлен в виде модулей для [Require](https://github.com/KaMeHb-UA/require). Не все модули обратно совместимы со стандартом [CommonJS](http://wiki.commonjs.org/wiki/Modules/1.1), поэтому рекомендуется использовать именно [Require](https://github.com/KaMeHb-UA/require).
