@@ -1,17 +1,4 @@
 'use strict';
-function groupLog({name, childs}){
-    try{
-        console.group(name);
-        childs.forEach(({type, data, name, childs}) => {
-            if(type == 'log'){
-                console.log(...data)
-            } else if(type == 'group'){
-                groupLog({name, childs})
-            }
-        });
-        console.groupEnd()
-    } catch(e){ console.warn('Your browser does not support group logging, so it will not be shown to you') }
-}
 // re-usable (cached) promise
 const getDefinitions = (() => {
     const definitions = (async () => {
@@ -318,18 +305,3 @@ const res = (async () => {
 })();
 exports.__esModule = true;
 exports.default = res;
-// support for top-level await in https://github.com/KaMeHb-UA/require
-try{
-    let _ = await res;
-    module.exports = _
-} catch(e){}
-
-groupLog({
-    name: 'AllBooms comments widget',
-    childs: [
-        {
-            type: 'log',
-            data: ['Exported', module.exports]
-        }
-    ]
-});
