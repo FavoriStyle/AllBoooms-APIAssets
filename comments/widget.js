@@ -241,7 +241,7 @@ module.exports = await (async () => {
                     myComment.placeholder = dict.userNotLogged;
                     myComment.setAttribute('disabled', '');
                     submit.innerText = dict.login;
-                    submit.innerHTML = submit.innerHTML + ' <i class="allbooms-brand-icon-allbooms"></i>';
+                    submit.innerHTML = submit.innerHTML + ' <i class="allbooms-brand-icons-allbooms"></i>';
                     submit.classList.add('login-highlight');
                 }
                 // Изменяем поведение кнопки
