@@ -103,6 +103,7 @@ exports.Link = class Link{
             set(target, name, value){
                 target[name] = value;
                 _this.params = target;
+                return true
             }
         })
     }
