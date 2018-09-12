@@ -153,8 +153,10 @@ declare namespace _system{
         set(name: String, value: String, options: {expires: Number}): void,
         del(name: String): void
     };
-    export type Link = {
-        addParam(url: String, key: String, value: String): String
+    export class Link{
+        constructor(url: String);
+        href: String;
+        params: {[String]: String};
     }
     export class ExtString extends String{
         reverse():ExtString

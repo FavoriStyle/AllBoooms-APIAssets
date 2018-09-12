@@ -75,14 +75,43 @@ var Cookies = {
     }
 }
 exports.Cookies = Cookies;
+
+const LinkInternalElement = Symbol('LinkInternalElement'),
+    LinkInternalParams = Symbol('LinkInternalParams');
 /**
  * @type {_system.Link}
  */
-exports.Link = {
-    addParam(url, key, value){
-        var _ = url.split('#'), splitter = '&';
-        if(_[0].split('?').length == 1) splitter = '?';
-        return `${_[0]}${splitter}${encodeURIComponent(key)}=${encodeURIComponent(value)}${_[1] ? `#${_[1]}` : ''}`;
+exports.Link = class Link{
+    constructor(url){
+        this[LinkInternalElement] = window.document.createElement('a');
+        this.href = url;
+    }
+    get href(){
+        return this[LinkInternalElement].href
+    }
+    set href(url){
+        this[LinkInternalElement].href = url;
+        this[LinkInternalParams] = {};
+        this[LinkInternalElement].search.slice(1).split('&').forEach(_ => {
+            _ = _.split('=');
+            this[LinkInternalParams][decodeURIComponent(_[0])] = decodeURIComponent(_[1]);
+        });
+    }
+    get params(){
+        var _this = this;
+        return new Proxy(this[LinkInternalParams], {
+            set(target, name, value){
+                target[name] = value;
+                _this.params = target;
+            }
+        })
+    }
+    set params(params){
+        var search = '';
+        for(var i in params){
+            search += '&' + encodeURIComponent(i) + '=' + encodeURIComponent(params[i])
+        }
+        this[LinkInternalElement].search = '?' + search.slice(1);
     }
 }
 exports.ExtString = class ExtString extends String{
