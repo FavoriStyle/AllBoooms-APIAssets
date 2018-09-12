@@ -93,6 +93,7 @@ exports.Link = class Link{
         this[LinkInternalElement].href = url;
         this[LinkInternalParams] = {};
         this[LinkInternalElement].search.slice(1).split('&').forEach(_ => {
+            if(_ == '') return;
             _ = _.split('=');
             this[LinkInternalParams][decodeURIComponent(_[0])] = decodeURIComponent(_[1]);
         });
@@ -115,7 +116,7 @@ exports.Link = class Link{
     set params(params){
         var search = '';
         for(var i in params){
-            search += '&' + encodeURIComponent(i) + '=' + encodeURIComponent(params[i])
+            search += '&' + encodeURIComponent(i) + (params[i] ? '=' + encodeURIComponent(params[i]) : '')
         }
         this[LinkInternalElement].search = '?' + search.slice(1);
     }
