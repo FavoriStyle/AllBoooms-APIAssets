@@ -250,12 +250,13 @@ const res = (async () => {
             var myComment = document.createElement('input'),
                 submit = document.createElement('button'),
                 commentsList = document.createElement('div'),
-                style = document.createElement('style');
-            // Добавляем элементы в контейнер
-            this.conainer.appendChild(myComment);
-            this.conainer.appendChild(submit);
-            this.conainer.appendChild(commentsList);
-            this.conainer.appendChild(style);
+                style = document.createElement('style'),
+                shadowRoot = this.conainer.attachShadow();
+            // Добавляем элементы в к̶о̶н̶т̶е̶й̶н̶е̶р ShadowRoot
+            shadowRoot.appendChild(myComment);
+            shadowRoot.appendChild(submit);
+            shadowRoot.appendChild(commentsList);
+            shadowRoot.appendChild(style);
             // Применяем настройки
             myComment.placeholder = dict.placeholder;
             myComment.setAttribute('class', 'comment-input');
@@ -263,7 +264,6 @@ const res = (async () => {
             submit.setAttribute('class', 'comment-input-submit');
             submit.innerText = dict.submitText;
             commentsList.setAttribute('class', 'allbooms-comments-container');
-            style.setAttribute('scoped', '');
             style.innerHTML = options.style || '';
             if(!currentUser){
                 myComment.placeholder = dict.userNotLogged;
