@@ -251,7 +251,7 @@ const res = (async () => {
                 submit = document.createElement('button'),
                 commentsList = document.createElement('div'),
                 style = document.createElement('style'),
-                shadowRoot = this.conainer.attachShadow();
+                shadowRoot = this.conainer.attachShadow({mode: 'open'});
             // Добавляем элементы в к̶о̶н̶т̶е̶й̶н̶е̶р ShadowRoot
             shadowRoot.appendChild(myComment);
             shadowRoot.appendChild(submit);
