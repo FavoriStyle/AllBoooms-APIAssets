@@ -1,67 +1,60 @@
 @import url('https://fonts.googleapis.com/css?family=Roboto');
 @import url('https://cdn.jsdelivr.net/gh/FavoriStyle/AllBooms-brand-icons@3.0.0/dist/allbooms-brand-icons.css');
-:root{
-    --theme-color: #00b1b3;
-    --highlighted-text-color: #ffffff;
-}
-.allbooms-comments-widget{
-    width: 280px;
-}
-.allbooms-single-comment{
+.single-comment{
     width: 100%;
 }
-.allbooms-single-comment a > img{
+.single-comment a > img{
     max-height: 42px;
     border-radius: 50%;
 }
-.allbooms-single-comment tr:first-child > td:first-child{
+.single-comment tr:first-child > td:first-child{
     width: 42px;
     vertical-align: top;
 }
-.allbooms-single-comment tr:first-child > td:last-child{
+.single-comment tr:first-child > td:last-child{
     width: 55px;
     text-align: right;
 }
-.allbooms-single-comment tr:first-child > td:nth-child(2){
+.single-comment tr:first-child > td:nth-child(2){
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
 }
-.allbooms-single-comment tr:first-child > td:nth-child(2) > a{
+.single-comment tr:first-child > td:nth-child(2) > a{
     width: 1px;
     display: inline-block;
 }
-.allbooms-comments-widget *{
+*{
     font-size: 12px;
     font-family: 'Roboto', sans-serif;
 }
-.allbooms-comments-widget .comment-input-submit{
+.comment-input-submit{
     float: right;
     width: 80px;
     border: 0;
     background: transparent;
 }
-.allbooms-comments-widget .comment-input{
+.comment-input{
     width: calc(100% - 80px);
     border: 0;
     border-bottom: 2px solid darkgrey;
     transition: 1s;
 }
-.allbooms-comments-widget .comment-input:focus{
+.comment-input:focus{
     outline: none;
     border-bottom-color: var(--theme-color);
 }
-.allbooms-comments-container{
+.comments-container{
     margin-top: 10px;
     max-height: 400px;
     overflow-y: auto;
 }
-.allbooms-comments-widget .comment-input-submit.login-highlight{
+.comment-input-submit.login-highlight{
     background-color: var(--theme-color);
     color: var(--highlighted-text-color);
     border-bottom: 2px solid var(--theme-color);
 }
-.allbooms-comments-widget .comment-input-submit.login-highlight i.allbooms-brand-icons-allbooms:before{
+.comment-input-submit.login-highlight i.allbooms-brand-icons-allbooms:before{
     position: relative;
     top: 2px;
     left: 2px;

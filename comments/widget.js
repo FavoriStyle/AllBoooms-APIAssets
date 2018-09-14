@@ -1,4 +1,32 @@
 'use strict';
+const console = (loggerName => {
+    var __syncEnd = false,
+        logs = [];
+    window.console.groupCollapsed(loggerName);
+    return new Proxy(window.console, {
+        get(target, name){
+            if(__syncEnd){
+
+            }
+        }
+    })
+})('AllBooms comments widget');
+// fonts MUST be defined in main DOM, so...
+document.head.appendChild((() => {
+    var imports = [
+        'https://fonts.googleapis.com/css?family=Roboto',
+        'https://cdn.jsdelivr.net/gh/FavoriStyle/AllBooms-brand-icons@3.0.0/dist/allbooms-brand-icons.css',
+    ];
+    imports.forEach((link, i) => {
+        imports[i] = `@import url("${
+            link.replace('"', '%22').replace('\\', '%5C')
+        }");\n`
+    });
+    var fontsImporter = document.createElement('style');
+    fontsImporter.innerHTML = imports.join('');
+    console.log('Added global style to use fonts in widget:\n', fontsImporter.firstChild);
+    return fontsImporter
+})());
 // re-usable (cached) promise
 const getDefinitions = (() => {
     const definitions = (async () => {
@@ -103,22 +131,10 @@ const getDefinitions = (() => {
 })();
 
 const res = (async () => {
-    const { APIref, API, dictionary, wait, normalizeDate, Link, Cookies } = await getDefinitions();
+    const { APIref, API, dictionary, wait, normalizeDate, Link, Cookies, defaultStyles } = await getDefinitions();
     var { currentUser } = await getDefinitions();
     /*-----------------------------*\
-    | Adding stylesheet to the page |
-    \*-----------------------------*/
-    (async () => {
-        // according to the Promises/A+ standard (https://promisesaplus.com/), this func will be executed in synch way.
-        // By the way, it is doesn't matter
-        const { defaultStyles } = await getDefinitions(),
-            style = document.createElement('style');
-        style.innerHTML = defaultStyles;
-        style.setAttribute('name', 'allbooms-comments-default');
-        document.head.appendChild(style)
-    })();
-    /*-----------------------------*\
-    | Adding stylesheet to the page |
+    | Saving cookies if needed      |
     \*-----------------------------*/
     await (async () => {
         var loc = new Link(location.href);
@@ -175,7 +191,7 @@ const res = (async () => {
             commentTimeContainer.innerText = normalizeDate(new Date(timestamp * 1000));
             commentTextContainer.innerText = text;
             // Помечаем элементы
-            table.setAttribute('class', 'allbooms-single-comment');
+            table.setAttribute('class', 'single-comment');
             return table;
         }
     }
@@ -246,13 +262,15 @@ const res = (async () => {
             this.conainer = document.createElement('div');
             this.conainer.id = `comments-widget-${widgetID}`;
             this.conainer.setAttribute('class', 'allbooms-comments-widget');
+            this.conainer.setAttribute('style', 'width: 280px; --theme-color: #00b1b3; --highlighted-text-color: #ffffff');
             // Создаём элементы
             var myComment = document.createElement('input'),
                 submit = document.createElement('button'),
                 commentsList = document.createElement('div'),
                 style = document.createElement('style'),
-                shadowRoot = this.conainer.attachShadow({mode: 'open'});
+                shadowRoot = this.conainer.attachShadow({mode: 'closed'});
             // Добавляем элементы в к̶о̶н̶т̶е̶й̶н̶е̶р ShadowRoot
+            console.log([shadowRoot]);
             shadowRoot.appendChild(myComment);
             shadowRoot.appendChild(submit);
             shadowRoot.appendChild(commentsList);
@@ -263,8 +281,8 @@ const res = (async () => {
             submit.type = 'submit';
             submit.setAttribute('class', 'comment-input-submit');
             submit.innerText = dict.submitText;
-            commentsList.setAttribute('class', 'allbooms-comments-container');
-            style.innerHTML = options.style || '';
+            commentsList.setAttribute('class', 'comments-container');
+            style.innerHTML = defaultStyles + (options.style || '');
             if(!currentUser){
                 myComment.placeholder = dict.userNotLogged;
                 myComment.setAttribute('disabled', '');
