@@ -9,7 +9,7 @@
 ### Подключение комментариев к своему сайту
 Для начала работы, подключите файл `comments/widget.min.js` этого репозитория к своему коду:
 ```javascript
-require('https://allbooms.com:3000/AllBoooms/APIAssets/raw/layer1/comments/widget.min.js').then(CommentsWidget => {
+require('https://cdn.jsdelivr.net/gh/FavoriStyle/AllBoooms-APIAssets@1/comments/widget.min.js').then(CommentsWidget => {
     var myWidget = new CommentsWidget('ID_приложения', 'ID_виджета');
     document.body.appendChild(myWidget);
 });
@@ -19,7 +19,7 @@ require('https://allbooms.com:3000/AllBoooms/APIAssets/raw/layer1/comments/widge
 ## Низкоуровневое взаимодействие с API
 **Для работы с API напрямую, подключите `APIref.min.js`:**
 ```javascript
-require('https://allbooms.com:3000/AllBoooms/APIAssets/raw/layer1/APIref.min.js').then(APIReference => {
+require('https://cdn.jsdelivr.net/gh/FavoriStyle/AllBoooms-APIAssets@1/APIref.min.js').then(APIReference => {
 
     var API = new APIReference;
 
