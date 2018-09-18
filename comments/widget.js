@@ -1,13 +1,19 @@
 'use strict';
 const console = (loggerName => {
-    var __syncEnd = false,
-        logs = [];
+    var __syncEnd = false;
     window.console.groupCollapsed(loggerName);
     return new Proxy(window.console, {
         get(target, name){
-            if(__syncEnd){
-
+            if(__syncEnd && typeof target[name] == 'function'){
+                return (...args) => {
+                    target.groupCollapsed(loggerName);
+                    target[name](...args);
+                    target.groupEnd()
+                }
+            } else if(!__syncEnd && name == 'groupEnd'){
+                __syncEnd = true
             }
+            return target[name]
         }
     })
 })('AllBooms comments widget');
@@ -253,6 +259,7 @@ const res = (async () => {
     }
     return class CommentsWidget{
         constructor(appID, widgetID, options){
+            if(!/^[a-zA-Z0-9_\-]+$/.test(widgetID)) throw new SyntaxError(`widgetID must contain only latin symbols, digits, - or _`)
             options = Object.assign({
                 lang: 'ru'
             }, options);
@@ -267,14 +274,12 @@ const res = (async () => {
             var myComment = document.createElement('input'),
                 submit = document.createElement('button'),
                 commentsList = document.createElement('div'),
-                style = document.createElement('style'),
-                shadowRoot = this.conainer.attachShadow({mode: 'closed'});
-            // Добавляем элементы в к̶о̶н̶т̶е̶й̶н̶е̶р ShadowRoot
-            console.log([shadowRoot]);
-            shadowRoot.appendChild(myComment);
-            shadowRoot.appendChild(submit);
-            shadowRoot.appendChild(commentsList);
-            shadowRoot.appendChild(style);
+                style = document.createElement('style');
+            // Добавляем элементы в контейнер
+            this.conainer.appendChild(myComment);
+            this.conainer.appendChild(submit);
+            this.conainer.appendChild(commentsList);
+            document.head.appendChild(style);
             // Применяем настройки
             myComment.placeholder = dict.placeholder;
             myComment.setAttribute('class', 'comment-input');
@@ -283,6 +288,14 @@ const res = (async () => {
             submit.innerText = dict.submitText;
             commentsList.setAttribute('class', 'comments-container');
             style.innerHTML = defaultStyles + (options.style || '');
+            (() => {
+                var res = '', i;
+                for(i = 0; i < style.sheet.cssRules.length; i++){
+                    res += `#${this.conainer.id} ${style.sheet.cssRules[i].cssText}`
+                }
+                style.innerHTML = res;
+                console.log([style.sheet])
+            })();
             if(!currentUser){
                 myComment.placeholder = dict.userNotLogged;
                 myComment.setAttribute('disabled', '');

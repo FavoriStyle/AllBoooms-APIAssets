@@ -1,5 +1,8 @@
-@import url('https://fonts.googleapis.com/css?family=Roboto');
-@import url('https://cdn.jsdelivr.net/gh/FavoriStyle/AllBooms-brand-icons@3.0.0/dist/allbooms-brand-icons.css');
+*{
+    font-size: 12px;
+    font-family: 'Roboto', sans-serif;
+    font-weight: normal;
+}
 .single-comment{
     width: 100%;
 }
@@ -24,21 +27,21 @@
     width: 1px;
     display: inline-block;
 }
-*{
-    font-size: 12px;
-    font-family: 'Roboto', sans-serif;
-}
 .comment-input-submit{
     float: right;
     width: 80px;
     border: 0;
     background: transparent;
+    height: 18px;
+    padding: 1px 6px;
 }
 .comment-input{
     width: calc(100% - 80px);
     border: 0;
     border-bottom: 2px solid darkgrey;
     transition: 1s;
+    background-color: white;
+    color: black;
 }
 .comment-input:focus{
     outline: none;
