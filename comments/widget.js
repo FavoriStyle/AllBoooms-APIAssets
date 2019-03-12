@@ -359,6 +359,7 @@ const res = (async () => {
                 if(options.strings) element.setAttribute('data-strings', JSON.stringify(options.strings));
                 if(options.style) element.setAttribute('data-style', options.style);
             }
+            return element
         }
     }
 })();
