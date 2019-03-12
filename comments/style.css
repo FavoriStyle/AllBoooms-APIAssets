@@ -31,6 +31,7 @@
 .single-comment tr:first-child > td:nth-child(2) > a{
     width: 1px;
     display: inline-block;
+    font-weight: 700;
 }
 .comment-input-submit{
     float: right;
@@ -70,4 +71,14 @@
     position: relative;
     top: 2px;
     left: 2px;
+}
+a{
+    color: var(--theme-color);
+    text-decoration: none;
+}
+td{
+    line-height: 0.8em;
+}
+tr:nth-child(2) > td{
+    line-height: 1em !important;
 }
