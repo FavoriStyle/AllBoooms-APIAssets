@@ -276,7 +276,6 @@ const res = (async () => {
                 // defaults
                 lang: 'ru'
             }, options);
-            console.log('Widget params before assign:', {appID, widgetID, options})
             const dict = Object.assign(dictionary[options.lang], options.strings || {}),
                 CommentsList = new CommentList;
             // Создаём контейнер
@@ -302,14 +301,6 @@ const res = (async () => {
             submit.innerText = dict.submitText;
             commentsList.setAttribute('class', 'comments-container');
             style.innerHTML = defaultStyles + (options.style || '');
-            (() => {
-                var res = '', i;
-                for(i = 0; i < style.sheet.cssRules.length; i++){
-                    res += `#${this.conainer.id} ${style.sheet.cssRules[i].cssText}`
-                }
-                style.innerHTML = res;
-                console.log([style.sheet])
-            })();
             if(!currentUser){
                 myComment.placeholder = dict.userNotLogged;
                 myComment.setAttribute('disabled', '');
