@@ -329,6 +329,7 @@ const res = (async () => {
                         user: currentUser,
                         text: myComment.value
                     }, commentsList);
+                    myComment.value = '';
                     submit.value = dict.submitText;
                     submit.removeAttribute('disabled')
                 }
