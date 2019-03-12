@@ -293,7 +293,7 @@ const res = (async () => {
             this.conainer.appendChild(myComment);
             this.conainer.appendChild(submit);
             this.conainer.appendChild(commentsList);
-            document.head.appendChild(style);
+            this.conainer.appendChild(style);
             // Применяем настройки
             myComment.placeholder = dict.placeholder;
             myComment.setAttribute('class', 'comment-input');
