@@ -262,8 +262,8 @@ const res = (async () => {
             if(!/^[a-zA-Z0-9_\-]+$/.test(widgetID)) throw new SyntaxError(`widgetID must contain only latin symbols, digits, - or _`)
             options = Object.assign({
                 lang: 'ru'
-            }, options);
-            const dict = Object.assign(dictionary[options.lang], options.strings),
+            }, options || {});
+            const dict = Object.assign(dictionary[options.lang], options.strings || {}),
                 CommentsList = new CommentList;
             // Создаём контейнер
             this.conainer = document.createElement('div');
