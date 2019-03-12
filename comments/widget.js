@@ -263,6 +263,7 @@ const res = (async () => {
             options = Object.assign({
                 lang: 'ru'
             }, options || {});
+            console.log('Widget params before assign:', {appID, widgetID, options})
             const dict = Object.assign(dictionary[options.lang], options.strings || {}),
                 CommentsList = new CommentList;
             // Создаём контейнер
@@ -337,8 +338,8 @@ const res = (async () => {
         constructor(){
             super();
             var shadow = this.attachShadow({mode: 'closed'});
-            const appID = this.getAttribute('data-appID');
-            const widgetID = this.getAttribute('data-widgetID');
+            const appID = this.getAttribute('data-appid');
+            const widgetID = this.getAttribute('data-widgetid');
             const options = {
                 lang: this.getAttribute('data-lang'),
                 strings: this.getAttribute('data-strings'),
@@ -352,8 +353,8 @@ const res = (async () => {
     return class {
         constructor(appID, widgetID, options){
             const element = document.createElement('allbooms-comments');
-            element.setAttribute('data-appID', appID);
-            element.setAttribute('data-widgetID', widgetID);
+            element.setAttribute('data-appid', appID);
+            element.setAttribute('data-widgetid', widgetID);
             if(options){
                 if(options.lang) element.setAttribute('data-lang', options.lang);
                 if(options.strings) element.setAttribute('data-strings', JSON.stringify(options.strings));
