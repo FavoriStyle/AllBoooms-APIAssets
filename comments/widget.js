@@ -336,8 +336,7 @@ const res = (async () => {
     class AllBoomsCommentsWidget extends HTMLElement{
         constructor(){
             super();
-            var shadow = this.attachShadow({mode: 'open'});
-            styles.forEach(style => shadow.appendChild(style));
+            var shadow = this.attachShadow({mode: 'closed'});
             const appID = this.getAttribute('data-appID');
             const widgetID = this.getAttribute('data-widgetID');
             const options = {
