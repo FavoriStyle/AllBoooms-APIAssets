@@ -225,9 +225,21 @@ const res = (async () => {
             prependNew(list = {comments:[]}, commentsList){
                 list.comments.reverse().forEach(elem => {
                     elem.user = list.users[elem.userid];
-                    elem = add.apply(this, [elem]);
+                    elem = add.call(this, elem);
                     if(elem) updateContainer(elem, commentsList);
                 })
+            }
+            add(comment){
+                this.prependNew({
+                    comments: [{
+                        id: comment.id,
+                        timestamp: comment.timestamp,
+                        userid: comment.user.id,
+                        text: comment.text
+                    }],
+                    users: { [comment.user.id]: comment.user },
+                })
+                return comment
             }
         }
     })();
