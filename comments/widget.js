@@ -257,7 +257,7 @@ const res = (async () => {
             commentsList.appendChild(element)
         }
     }
-    return class CommentsWidget{
+    class CommentsWidget{
         constructor(appID, widgetID, options){
             if(!/^[a-zA-Z0-9_\-]+$/.test(widgetID)) throw new SyntaxError(`widgetID must contain only latin symbols, digits, - or _`)
             options = Object.assign({
@@ -331,6 +331,35 @@ const res = (async () => {
             });
             requestComments(CommentsList, commentsList, appID, widgetID);
             return this.conainer
+        }
+    }
+    class AllBoomsCommentsWidget extends HTMLElement{
+        constructor(){
+            super();
+            var shadow = this.attachShadow({mode: 'open'});
+            styles.forEach(style => shadow.appendChild(style));
+            const appID = this.getAttribute('data-appID');
+            const widgetID = this.getAttribute('data-widgetID');
+            const options = {
+                lang: this.getAttribute('data-lang'),
+                strings: this.getAttribute('data-strings'),
+                style: this.getAttribute('data-style'),
+            };
+            if(options.strings) options.strings = JSON.parse(options.strings);
+            shadow.appendChild(new CommentsWidget(appID, widgetID, options));
+        }
+    }
+    customElements.define('allbooms-comments', AllBoomsCommentsWidget);
+    return class {
+        constructor(appID, widgetID, options){
+            const element = document.createElement('allbooms-comments');
+            element.setAttribute('data-appID', appID);
+            element.setAttribute('data-widgetID', widgetID);
+            if(options){
+                if(options.lang) element.setAttribute('data-lang', options.lang);
+                if(options.strings) element.setAttribute('data-strings', JSON.stringify(options.strings));
+                if(options.style) element.setAttribute('data-style', options.style);
+            }
         }
     }
 })();
