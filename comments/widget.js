@@ -220,13 +220,13 @@ const res = (async () => {
             /**
              * Prepends to self list only the new comments
              * @param {{comments:Array<API.CommentList>,users:API.UserList}} list
-             * @param {Element} commentsList
+             * @param {Element=} commentsList
              */
             prependNew(list = {comments:[]}, commentsList){
                 list.comments.reverse().forEach(elem => {
                     elem.user = list.users[elem.userid];
                     elem = add.call(this, elem);
-                    if(elem) updateContainer(elem, commentsList);
+                    if(elem && commentsList) updateContainer(elem, commentsList);
                 })
             }
             add(comment){
