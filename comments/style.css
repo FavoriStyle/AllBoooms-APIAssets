@@ -41,7 +41,7 @@
     padding: 1px 6px;
 }
 .comment-input{
-    width: calc(100% - 85px);
+    width: calc(100% - 86px);
     border: 0;
     border-bottom: 2px solid darkgrey;
     transition: 1s;
