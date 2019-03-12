@@ -260,9 +260,11 @@ const res = (async () => {
     class CommentsWidget{
         constructor(appID, widgetID, options){
             if(!/^[a-zA-Z0-9_\-]+$/.test(widgetID)) throw new SyntaxError(`widgetID must contain only latin symbols, digits, - or _`)
+            for(var i in options) if(options[i] === null) delete options[i];
             options = Object.assign({
+                // defaults
                 lang: 'ru'
-            }, options || {});
+            }, options);
             console.log('Widget params before assign:', {appID, widgetID, options})
             const dict = Object.assign(dictionary[options.lang], options.strings || {}),
                 CommentsList = new CommentList;
@@ -352,15 +354,15 @@ const res = (async () => {
     customElements.define('allbooms-comments', AllBoomsCommentsWidget);
     return class {
         constructor(appID, widgetID, options){
-            const element = document.createElement('allbooms-comments');
-            element.setAttribute('data-appid', appID);
-            element.setAttribute('data-widgetid', widgetID);
+            const wrapper = document.createElement('div');
+            var str = `<allbooms-comments data-appid="${appID}" data-widgetid="${widgetID}"`;
             if(options){
-                if(options.lang) element.setAttribute('data-lang', options.lang);
-                if(options.strings) element.setAttribute('data-strings', JSON.stringify(options.strings));
-                if(options.style) element.setAttribute('data-style', options.style);
+                if(options.lang) str += ` data-lang="${options.lang}"`
+                if(options.strings) str += ` data-strings="${JSON.stringify(options.strings)}"`
+                if(options.style) str += ` data-style="${options.style}"`
             }
-            return element
+            wrapper.innerHTML = str + '></allbooms-comments>'
+            return wrapper.children[0]
         }
     }
 })();
