@@ -220,16 +220,16 @@ const res = (async () => {
             /**
              * Prepends to self list only the new comments
              * @param {{comments:Array<API.CommentList>,users:API.UserList}} list
-             * @param {Element=} commentsList
+             * @param {Element} commentsList
              */
             prependNew(list = {comments:[]}, commentsList){
                 list.comments.reverse().forEach(elem => {
                     elem.user = list.users[elem.userid];
                     elem = add.call(this, elem);
-                    if(elem && commentsList) updateContainer(elem, commentsList);
+                    if(elem) updateContainer(elem, commentsList);
                 })
             }
-            add(comment){
+            add(comment, commentsList){
                 this.prependNew({
                     comments: [{
                         id: comment.id,
@@ -238,8 +238,7 @@ const res = (async () => {
                         text: comment.text
                     }],
                     users: { [comment.user.id]: comment.user },
-                })
-                return comment
+                }, commentsList)
             }
         }
     })();
@@ -333,13 +332,12 @@ const res = (async () => {
                         widget_id: widgetID,
                         text: myComment.value,
                     });
-                    var myComment0 = CommentsList.add({
+                    CommentsList.add({
                         id,
                         timestamp,
                         user: currentUser,
                         text: myComment.value
-                    });
-                    if(myComment0) updateContainer(myComment0, commentsList);
+                    }, commentsList);
                     submit.value = dict.submitText;
                     submit.removeAttribute('disabled')
                 }
