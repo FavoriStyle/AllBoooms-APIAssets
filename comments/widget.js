@@ -321,13 +321,13 @@ const res = (async () => {
                         widget_id: widgetID,
                         text: myComment.value,
                     });
-                    var myComment = CommentsList.add({
+                    var myComment0 = CommentsList.add({
                         id,
                         timestamp,
                         user: currentUser,
                         text: myComment.value
                     });
-                    if(myComment) updateContainer(myComment, commentsList);
+                    if(myComment0) updateContainer(myComment0, commentsList);
                     submit.value = dict.submitText;
                     submit.removeAttribute('disabled')
                 }
