@@ -18,9 +18,10 @@ class CommentsTable{
         });
         this.table_body = this.table.children[0]
     }
-    prepend({ uid, avatar, name, text, time }){
+    static _generateElement({ id, uid, avatar, name, text, time }){
         const newChild = createElement({
             name: 'tr',
+            attrs: { 'commentid': id },
             childs: [
                 {
                     name: 'td',
@@ -60,8 +61,17 @@ class CommentsTable{
                 },
             }],
         });
+        return [newChild, nextChild]
+    }
+    prepend({ id, uid, avatar, name, text, time }){
+        const [ newChild, nextChild ] = CommentsTable._generateElement({ id, uid, avatar, name, text, time });
         this.table_body.children[0] ? this.table_body.insertBefore(nextChild, this.table_body.children[0]) : this.table_body.appendChild(nextChild);
         this.table_body.insertBefore(newChild, nextChild)
+    }
+    append({ id, uid, avatar, name, text, time }){
+        const [ newChild, nextChild ] = CommentsTable._generateElement({ id, uid, avatar, name, text, time });
+        this.table_body.appendChild(newChild);
+        this.table_body.appendChild(nextChild);
     }
 }
 
@@ -138,6 +148,7 @@ class AllBoomsCommentsWidget extends HTMLElement{
                 const comments = await API.comments.external.list({
                     app_id: appID,
                     widget_id: widgetID,
+                    after: table.table_body.lastElementChild ? table.table_body.lastElementChild.getAttribute('commentid') : undefined
                 });
                 const userInfo = await API.user.getInfo({
                     token: currentToken(),
@@ -145,13 +156,15 @@ class AllBoomsCommentsWidget extends HTMLElement{
                 });
                 comments.forEach(({ id, userid, text, timestamp }) => {
                     table.prepend({
-                        uid: userid,
-                        text: text,
+                        id,
+                        text,
                         time: timestamp,
+                        uid: userid,
                         name: userInfo[userid].fullName,
                         avatar: userInfo[userid].avatar,
                     })
-                })
+                });
+                setTimeout(requestComments, 2000)
             })()
         })
     }
