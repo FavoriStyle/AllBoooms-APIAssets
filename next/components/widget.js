@@ -1,12 +1,26 @@
 import APIReference from '../internal/APIref.js'
-import { currentDir, createElement, htmlSafeText, normalizeDate, currentUser, Link, currentToken, argsEncode, argsDecode } from '../internal/_system.js'
+import { createElement, htmlSafeText, normalizeDate, currentUser, Link, currentToken, argsEncode, argsDecode } from '../internal/_system.js'
 import Dictionary from './dictionary.js'
+import WidgetStyle from './widget.style.js'
+import AllboomsBrandIcon from '../internal/allbooms-brand-icons/index.js';
 
 function onlyUnique(value, index, self){ 
     return self.indexOf(value) === index
 }
 
-const API = new APIReference
+const createElementInTableBody = (({children: {0: table_body}}) => {
+    return options => {
+        table_body.innerHTML = createElement.src(options);
+        return table_body.removeChild(table_body.children[0] || table_body.childNodes[0])
+    }
+})(createElement({
+    name: 'table',
+    childs: [{
+        name: 'tbody'
+    }]
+}));
+
+const API = new APIReference;
 
 class CommentsTable{
     constructor(){
@@ -19,9 +33,11 @@ class CommentsTable{
         this.table_body = this.table.children[0]
     }
     static _generateElement({ id, uid, avatar, name, text, time }){
-        const newChild = createElement({
+        const newChild = createElementInTableBody({
             name: 'tr',
-            attrs: { 'commentid': id },
+            attrs: {
+                commentid: id,
+            },
             childs: [
                 {
                     name: 'td',
@@ -51,7 +67,7 @@ class CommentsTable{
                 },
             ],
         });
-        const nextChild = createElement({
+        const nextChild = createElementInTableBody({
             name: 'tr',
             childs: [{
                 name: 'td',
@@ -76,38 +92,59 @@ class CommentsTable{
 }
 
 class AllBoomsCommentsWidget extends HTMLElement{
+    /** @typedef {Dictionary['ru']} _Dict */
     constructor(){
         super();
         const appID = decodeURIComponent(this.getAttribute('data-appid'));
         const widgetID = decodeURIComponent(this.getAttribute('data-widgetid'));
         const options = {
-            lang: decodeURIComponent(this.getAttribute('data-lang') || ''),
+            lang: decodeURIComponent(this.getAttribute('data-lang') || 'ru'),
             strings: argsDecode(this.getAttribute('data-strings')),
         };
-        if(options.strings) options.strings = JSON.parse(options.strings);
         const loc = new Link(location.href);
-        const dictionary = new Dictionary(options.lang);
+        /** @type {_Dict} */
+        const dictionary = Dictionary[options.lang];
         const shadow = this.attachShadow({mode: 'closed'});
+        this.styles = new WidgetStyle(shadow);
+        //const inputWidth = this.styles.input.get('width');
+        //const buttonWidth = this.styles.button.get('width');
+        // inputWidth instanceof CSSCalcRule === true
+        //inputWidth.secondArg = '64px';
+        //buttonWidth.set(inputWidth.secondArg);
         const table = new CommentsTable;
-        const input = createElement({
-            name: 'input',
+        const inputAndButtonWrapper = createElement({
+            name: 'div',
             attrs: {
-                class: 'comment-input',
-                placeholder: dictionary.placeholder,
-            }
+                class: 'input-and-button-wrapper',
+            },
+            childs: [
+                {
+                    name: 'input',
+                    attrs: {
+                        placeholder: dictionary.placeholder,
+                    },
+                },
+                {
+                    name: 'a',
+                    attrs: {
+                        href: '#',
+                    },
+                    childs: [{
+                        name: 'span'
+                    }],
+                },
+            ]
         });
-        const button = createElement({
-            name: 'button',
-            class: 'comment-input-submit',
-            type: 'submit',
-        });
+        const input = inputAndButtonWrapper.children[0];
+        const button = inputAndButtonWrapper.children[1];
+        const buttonInnerSpan = button.children[0];
         currentUser().then(user => {
             if(user){
                 input.setAttribute('placeholder', dictionary.placeholder);
-                button.innerText = dictionary.submitText;
+                buttonInnerSpan.innerText = dictionary.submitText;
                 button.addEventListener('click', () => {
                     input.disabled = true;
-                    button.disabled = true;
+                    button.classList.add('disabled');
                     API.comments.external.add({
                         token: currentToken(),
                         widget_id: widgetID,
@@ -115,33 +152,22 @@ class AllBoomsCommentsWidget extends HTMLElement{
                     }).then(({ id, timestamp }) => {
                         input.value = '';
                         input.disabled = false;
-                        button.disabled = false;
+                        button.classList.remove('disabled');
                     });
                 })
             } else {
                 input.setAttribute('placeholder', dictionary.userNotLogged);
                 input.disabled = true;
                 button.classList.add('login-highlight');
-                button.innerText = dictionary.login;
-                button.insertBefore(createElement({
-                    name: 'i',
-                    attrs: { class: 'allbooms-brand-icons-allbooms' }
-                }), button.childNodes[0]);
+                buttonInnerSpan.innerText = dictionary.login;
+                button.insertBefore(new AllboomsBrandIcon('allbooms'), button.childNodes[0]);
                 button.addEventListener('click', e => {
                     e.preventDefault();
                     location.href = `${APIReference.baseHost}/getToken?callback=${encodeURIComponent(loc.href)}&appid=${encodeURIComponent(appID)}`
                 })
             }
             [
-                createElement({
-                    name: 'link',
-                    attrs: {
-                        rel: 'style',
-                        href: currentDir() + '/widget.style.css'
-                    }
-                }),
-                button,
-                input,
+                inputAndButtonWrapper,
                 table.table,
             ].forEach(element => shadow.appendChild(element));
             (async function requestComments(){
@@ -154,6 +180,10 @@ class AllBoomsCommentsWidget extends HTMLElement{
                     token: currentToken(),
                     list: comments.map(({userid}) => userid).filter(onlyUnique)
                 });
+                console.log({ userInfo, comments, requestData: {
+                    token: currentToken(),
+                    list: comments.map(({userid}) => userid).filter(onlyUnique)
+                } });
                 comments.forEach(({ id, userid, text, timestamp }) => {
                     table.prepend({
                         id,
@@ -164,21 +194,39 @@ class AllBoomsCommentsWidget extends HTMLElement{
                         avatar: userInfo[userid].avatar,
                     })
                 });
-                setTimeout(requestComments, 2000)
+                setTimeout(requestComments, 200000)
             })()
         })
     }
 }
+
+const cssVars = (() => {
+    const cssVars = {
+        'border-radius': 2,
+        'width': 280,
+        'theme-color': '#00b1b3',
+        'highlighted-text-color': '#fff'
+    };
+    var res = '';
+    for(var i in cssVars) res += `--${i}:${typeof cssVars[i] == 'number' ? cssVars[i] + 'px' : cssVars[i]};`;
+    return res
+})();
+
 customElements.define('allbooms-comments', AllBoomsCommentsWidget);
-return class {
+export default class {
     constructor(appID, widgetID, options){
-        return createElement({
+        options = options || {};
+        /** @type {AllBoomsCommentsWidget} */
+        const element = createElement({
             name: 'allbooms-comments',
             attrs: {
                 'data-appid': encodeURIComponent(appID),
                 'data-widgetid': encodeURIComponent(widgetID),
-                'data-strings': argsEncode(options.strings)
+                'data-strings': argsEncode(options.strings),
+                'data-lang': encodeURIComponent(options.lang || ''),
+                style: cssVars,
             }
-        })
+        });
+        return element
     }
 }

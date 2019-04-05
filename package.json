@@ -2,9 +2,11 @@
     "name": "assets-for-allbooms-api",
     "version": "0.1.3-layer1",
     "scripts": {
-        "build": "node build.js"
+        "build": "node build.js",
+        "test": "serve next"
     },
     "dependencies": {
+        "serve": "^10.1.2",
         "uglify-es": "^3.3.9"
     }
 }

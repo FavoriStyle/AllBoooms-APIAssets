@@ -1,14 +1,10 @@
-const dict = {
-    ru: {
-        placeholder: 'Ваш комментарий',
-        submitText: 'Отправить',
-        submittingText: 'Отправка...',
-        userNotLogged: 'Для добавления комментария',
-        login: 'Войдите',
-    },
-};
-export default class Dictionary{
-    constructor(lang){
-        return dict[lang]
-    }
+export const ru = {
+    placeholder: 'Ваш комментарий',
+    submitText: '↵',
+    submittingText: 'Отправка...',
+    userNotLogged: 'Для добавления комментария',
+    login: 'Войдите',
 }
+
+const dict = { ru, }
+export default dict

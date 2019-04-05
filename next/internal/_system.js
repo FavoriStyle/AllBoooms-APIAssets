@@ -1,4 +1,4 @@
-import APIReference from './APIref'
+import APIReference from './APIref.js'
 
 const LinkInternalElement = Symbol('LinkInternalElement'),
     LinkInternalParams = Symbol('LinkInternalParams'),
@@ -144,17 +144,22 @@ export function currentDir(){
     return parts.join('/')
 }
 
+const _createElementChildContext = Object(Symbol());
+
 export function createElement({ name, attrs, html, childs }){
     attrs = attrs || {};
     html = html || '';
     childs = childs || [];
-    const wrapper = document.createElement('div');
     var _attrs = '';
     for(var i in attrs) _attrs += ` ${i}="${attrs[i]}"`;
-    html += childs.map(createElement).join('');
-    wrapper.innerHTML = `<${name}${_attrs}>${html}</${name}>`;
-    return wrapper.removeChild(wrapper.children[0])
+    html += childs.map(createElement.bind(_createElementChildContext)).join('');
+    const result = `<${name}${_attrs}>${html}</${name}>`;
+    if(this === _createElementChildContext) return result;
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = result;
+    return wrapper.removeChild(wrapper.children[0] || wrapper.childNodes[0])
 }
+Object.assign(createElement, { src: createElement.bind(_createElementChildContext) });
 
 export function htmlSafeText(text){
     return text.replace('<', '&lt;').replace('>', '&gt;')
@@ -184,4 +189,36 @@ export function argsDecode(args){
         res[decodeURIComponent(parts.shift())] = decodeURIComponent(parts.join('='))
     });
     return res
+}
+
+export const rand = () => Math.random().toString(36).substring(2, 15)
+
+export const setImmediate = (() => {
+    var head = {},
+        tail = head;
+    var ID = Math.random();
+
+    window.addEventListener('message', e => {
+        if (e.data != ID) return;
+        head = head.next;
+        var func = head.func;
+        delete head.func;
+        func()
+    });
+
+    return func => {
+        tail = tail.next = {
+            func: func
+        };
+        window.postMessage(ID, "*")
+    }
+})();
+
+export function waitForProp(obj, prop, ...excludedValues){
+    const hasOwnProperty = Object.prototype.hasOwnProperty.bind(obj, prop);
+    return new Promise(r => {
+        setImmediate(function awaiter(){
+            if(hasOwnProperty() && excludedValues.indexOf(obj[prop]) === -1) r(); else setImmediate(awaiter)
+        })
+    })
 }

@@ -30,9 +30,14 @@ type ElementOptions = {
 
 type Unpromisify<T> = T extends Promise<infer R> ? R : never
 
-export function createElement(options: ElementOptions): Element
+type CreateElementFunction = ((options: ElementOptions) => Element) & { src: (options: ElementOptions) => string }
+
+export const createElement: CreateElementFunction
 export function htmlSafeText(text: string): string
 export function currentUser(): Promise<Unpromisify<ReturnType<typeof APIReference.prototype.user.getMe>> | null>
 export function currentToken(): string
 export function argsEncode(args: {[x: string]: string}): string
 export function argsDecode(args: string): {[x: string]: string}
+export function rand(): string
+export function setImmediate<F extends Function>(func: F): void
+export function waitForProp(obj: any, prop: string | number | symbol, ...excludedValues: any[]): Promise<void>

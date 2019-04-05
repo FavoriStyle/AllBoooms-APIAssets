@@ -1,4 +1,11 @@
-interface Dictionary{
+import * as _Dictionary from './dictionary'
+
+type Omit<T, K> = Pick<T, Exclude<keyof T, K>>
+
+const Dictionary: Omit<typeof _Dictionary, 'default'>
+export default Dictionary
+
+interface Dict{
     placeholder: string
     submitText: string
     submittingText: string
@@ -6,9 +13,4 @@ interface Dictionary{
     login: string
 }
 
-const Dictionary: {
-    new(lang: 'ru'): Dictionary
-    prototype: Dictionary
-}
-
-export default Dictionary
+export const ru: Dict
