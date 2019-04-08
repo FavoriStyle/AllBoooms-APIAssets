@@ -4,9 +4,72 @@ const LinkInternalElement = Symbol('LinkInternalElement'),
     LinkInternalParams = Symbol('LinkInternalParams'),
     API = new APIReference;
 
-export function normalizeDate(date){
-    return 'вчера'
-}
+export const normalizeDate = (() => {
+    const sec = 1000;
+    const min = sec * 60;
+    const hour = min * 60;
+    const day = hour * 24;
+    const defaultDict = {
+        yesterday: 'вчера',
+        before: 'назад',
+        // months
+        jan: 'янв',
+        feb: 'фев',
+        mar: 'мар',
+        apr: 'апр',
+        may: 'мая',
+        jun: 'июн',
+        jul: 'июл',
+        aug: 'авг',
+        sep: 'сен',
+        oct: 'окт',
+        nov: 'ноя',
+        dec: 'дек',
+        // time
+        hours: 'час',
+        mins: 'мин',
+        secs: 'сек',
+    };
+    function dayStart(date){
+        return date - date % day
+    }
+    function before(diff, divider, suffix, dictionary){
+        return `${diff / divider | 0} ${suffix} ${dictionary.before}`
+    }
+    function timeBefore(diff, dictionary){
+        if(diff % min === diff) return before(diff, sec, dictionary.secs, dictionary);
+        if(diff % hour === diff) return before(diff, min, dictionary.mins, dictionary);
+        return before(diff, hour, dictionary.hours, dictionary)
+    }
+    function formatDate(now, date, dictionary){
+        date = new Date(date);
+        const monthNames = [
+            dictionary.jan, dictionary.feb, dictionary.mar,
+            dictionary.apr, dictionary.may, dictionary.jun,
+            dictionary.jul, dictionary.aug, dictionary.sep,
+            dictionary.oct, dictionary.nov, dictionary.dec
+        ];
+        var year = date.getFullYear();
+        if(now.getFullYear() === year) year = ''; else year = ' ' + year;
+        return date.getDate() + ' ' + monthNames[date.getMonth()] + year
+    }
+    function checkDate(num){
+        const date = new Date(num);
+        if(date.getFullYear() < 2000) return new Date(num * 1000);
+        else return num
+    }
+    return (date, dictionary = {}) => {
+        date = checkDate(date);
+        const now = new Date;
+        const today = dayStart(now);
+        const tomorrow = today + day;
+        const diff = now - date;
+        dictionary = Object.assign({}, defaultDict, dictionary);
+        if(diff < day) return timeBefore(diff, dictionary);
+        else if(today <= date && tomorrow > date) return dictionary.yesterday;
+        else return formatDate(now, date, dictionary)
+    }
+})();
 
 export function wait(ms){
     return new Promise(r => setTimeout(r, ms))

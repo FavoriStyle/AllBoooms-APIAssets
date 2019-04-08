@@ -1,5 +1,27 @@
 import APIReference from './APIref'
-export function normalizeDate(date: Number): string
+
+type DateNormalizatorDictionaryWords =
+      'yesterday'
+    | 'before'
+    | 'jan'
+    | 'feb'
+    | 'mar'
+    | 'apr'
+    | 'may'
+    | 'jun'
+    | 'jul'
+    | 'aug'
+    | 'sep'
+    | 'oct'
+    | 'nov'
+    | 'dec'
+    | 'hours'
+    | 'mins'
+    | 'secs'
+
+type DateNormalizatorDictionary = { [T in DateNormalizatorDictionaryWords]?: string }
+
+export function normalizeDate(date: Number, dictionary?: DateNormalizatorDictionary): string
 export function wait(ms: Number): Promise<void>
 export const http: {
     get(url: string): Promise<string>
