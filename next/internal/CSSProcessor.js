@@ -23,10 +23,12 @@ export class CSSRule{
         this[RuleID] = `${prop}_${rand()}_${rand()}`;
         this[RuleProp] = prop;
         this[Set] = ruleset;
-        this[Symbol.toPrimitive] = () => `${prop}: ${typeof this[RuleVal] == 'number' && this[RuleVal] !== 0 ? this[RuleVal] + 'px' : this[RuleVal]};`;
         this[Rule] = this;
         this.set(val);
         return new Proxy(this[Rule], {});
+    }
+    [Symbol.toPrimitive](){
+        return `${this[RuleProp]}: ${typeof this[RuleVal] == 'number' && this[RuleVal] !== 0 ? this[RuleVal] + 'px' : this[RuleVal]};`
     }
     set(val){
         const idSplitter = `/* ${this[RuleID]} */\n`;
@@ -53,13 +55,26 @@ export class CSSRule{
     }
 }
 
+function isCalcRule(val){
+    return val && typeof val === 'object' && val.ruleType === 'calc'
+}
+
+var CSSCalcInnerRuleset;
+
 export class CSSCalcRule extends CSSRule{
     constructor(prop, { firstArg, operator, secondArg }, ruleset){
+        if(!CSSCalcInnerRuleset) CSSCalcInnerRuleset = new CSSRuleSet('inner-calc-ruleset', document.createElement('div').attachShadow({mode: 'closed'}));
+        if(isCalcRule(firstArg)) firstArg = new CSSCalcRule('inner-calc-rule', firstArg, CSSCalcInnerRuleset);
+        if(isCalcRule(secondArg)) secondArg = new CSSCalcRule('inner-calc-rule', secondArg, CSSCalcInnerRuleset);
         super(prop, `calc(${firstArg} ${operator} ${secondArg})`, ruleset);
         this[CalcRuleProps] = {};
         this.firstArg = firstArg;
         this.operator = operator;
         this.secondArg = secondArg;
+    }
+    [Symbol.toPrimitive](){
+        const innerRule = this[RuleProp] === 'inner-calc-rule';
+        return `${innerRule ? '' : (this[RuleProp] + ': ')}${this[RuleVal]}${innerRule ? '' : ';'}`
     }
     set firstArg(val){
         this[CalcRuleProps].firstArg = val;
@@ -84,10 +99,6 @@ export class CSSCalcRule extends CSSRule{
     get secondArg(){
         return this[CalcRuleProps].secondArg
     }
-}
-
-function isCalcRule(val){
-    return val && typeof val === 'object' && val.ruleType === 'calc'
 }
 
 export default class CSSRuleSet{

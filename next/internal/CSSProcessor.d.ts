@@ -1,23 +1,23 @@
+type Omit<T, K> = Pick<T, Exclude<keyof T, K>>
 type CSSValue = number | string
 type CSSCalcValue = {
     ruleType: 'calc'
-    firstArg: CSSValue
+    firstArg: CSSValues
 } & ({
     operator: '+' | '-'
-    secondArg: CSSValue
+    secondArg: CSSValues
 } | {
     operator: '*' | '/'
-    secondArg: number
+    secondArg: Exclude<CSSValues, string>
 })
 type CSSValues = CSSValue | CSSCalcValue
 type AnyCSSRule = CSSRule | CSSCalcRule
-type Omit<T, K> = Pick<T, Exclude<keyof T, K>>
 
 export class CSSCalcRule extends CSSRule{
     constructor<Value extends Omit<CSSCalcValue, 'ruleType'>>(prop: string, val: Value, ruleset: CSSRuleSet)
-    firstArg: CSSValue
+    firstArg: CSSValues
     operator: '+' | '-' | '*' | '/'
-    secondArg: CSSValue
+    secondArg: CSSValues
 }
 
 export class CSSRule{
