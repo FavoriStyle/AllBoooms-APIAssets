@@ -174,17 +174,18 @@ class AllBoomsCommentsWidget extends HTMLElement{
                     });
                 });
                 (async function requestComments(){
-                    const comments = await API.comments.external.list({
+                    const requestData = {
                         app_id: appID,
                         widget_id: widgetID,
-                        after: table.table_body.lastElementChild ? table.table_body.lastElementChild.getAttribute('commentid') : undefined,
-                    });
-                    const requestData = {
-                        token: currentToken(),
-                        list: comments.map(({userid}) => userid).filter(onlyUnique)
+                        after: table.table_body.firstElementChild ? table.table_body.firstElementChild.getAttribute('commentid') : undefined,
                     };
-                    const userInfo = await API.user.getInfo(requestData);
-                    console.log({ userInfo, comments, requestData });
+                    const comments = await API.comments.external.list(requestData);
+                    console.log({ comments, requestData });
+                    const userInfo = await API.user.getInfo({
+                        token: currentToken(),
+                        list: comments.map(({userid}) => userid).filter(onlyUnique),
+                        
+                    });
                     comments.forEach(({ id, userid, text, timestamp }) => {
                         table.prepend({
                             id,
