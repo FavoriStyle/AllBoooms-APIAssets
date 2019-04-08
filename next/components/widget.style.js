@@ -11,6 +11,7 @@ const themeColor = 'var(--theme-color)';
 const borderRadius = 'var(--border-radius)';
 const borderColor = 'darkgrey';
 const transitionDuration = .5; //s
+const avatarWidthHeight = 42;
 
 export default class {
     constructor(stylesRoot){
@@ -43,6 +44,7 @@ export default class {
             [buttonSelector + ', input']: input_and_button,
             'input:focus': focused_input,
             [commentAvatarTdSelector]: avatar_td,
+            [commentFirstRowSelector + ' > td:nth-child(2)']: name_td,
             [commentAvatarTdSelector + ' > img']: avatar,
             [commentSecondRowSelector + ' > td']: commentRow,
             'allbooms-icon': allboomsIcon,
@@ -137,7 +139,7 @@ export default class {
         });
 
         avatar_td.add({
-            width: 42,
+            width: avatarWidthHeight,
             'vertical-align': 'top',
         });
 
@@ -152,6 +154,23 @@ export default class {
 
         allboomsIcon.add({
             'font-size': 14,
+        });
+
+        name_td.add({
+            'max-width': {
+                ruleType: 'calc',
+                firstArg: {
+                    ruleType: 'calc',
+                    firstArg: width,
+                    operator: '-',
+                    secondArg: avatarWidthHeight + 'px'
+                },
+                operator: '-',
+                secondArg: 98 + 'px'
+            },
+            overflow: 'hidden',
+            'text-overflow': 'ellipsis',
+            'white-space': 'nowrap',
         });
 
         setTimeout(() => input_and_button.add('transition', transitionDuration * 1000 + 'ms'), 100);
