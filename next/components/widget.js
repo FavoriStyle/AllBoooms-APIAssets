@@ -178,6 +178,7 @@ class AllBoomsCommentsWidget extends HTMLElement{
                         app_id: appID,
                         widget_id: widgetID,
                         after: table.table_body.firstElementChild ? table.table_body.firstElementChild.getAttribute('commentid') : undefined,
+                        reversed: true,
                     };
                     const comments = await API.comments.external.list(requestData);
                     console.log({ comments, requestData });
@@ -196,7 +197,7 @@ class AllBoomsCommentsWidget extends HTMLElement{
                             avatar: userInfo[userid].avatar,
                         })
                     });
-                    setTimeout(requestComments, 200000)
+                    setTimeout(requestComments, 2000)
                 })()
             } else {
                 input.setAttribute('placeholder', dictionary.userNotLogged);
