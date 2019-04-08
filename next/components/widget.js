@@ -4,6 +4,24 @@ import Dictionary from './dictionary.js'
 import WidgetStyle from './widget.style.js'
 import AllboomsBrandIcon from '../internal/allbooms-brand-icons/index.js';
 
+const API = new APIReference;
+
+/*-----------------------------*\
+| Saving cookies if needed      |
+\*-----------------------------*/
+const locationProcess = (async () => {
+    const loc = new Link(location.href);
+    if(loc.params.save_allbooms_token !== undefined && loc.params.token){
+        const currentUser = await API.user.getMe({
+            token: loc.params.token,
+        });
+        if(currentUser) currentToken.save(loc.params.token);
+        delete loc.params.save_allbooms_token;
+        delete loc.params.token;
+        window.history.pushState(null, null, loc.href);
+    }
+})();
+
 function onlyUnique(value, index, self){ 
     return self.indexOf(value) === index
 }
@@ -19,8 +37,6 @@ const createElementInTableBody = (({children: {0: table_body}}) => {
         name: 'tbody'
     }]
 }));
-
-const API = new APIReference;
 
 class CommentsTable{
     constructor(){
@@ -101,7 +117,6 @@ class AllBoomsCommentsWidget extends HTMLElement{
             lang: decodeURIComponent(this.getAttribute('data-lang') || 'ru'),
             strings: argsDecode(this.getAttribute('data-strings')),
         };
-        const loc = new Link(location.href);
         /** @type {_Dict} */
         const dictionary = Dictionary[options.lang];
         const shadow = this.attachShadow({mode: 'closed'});
@@ -128,6 +143,7 @@ class AllBoomsCommentsWidget extends HTMLElement{
                     name: 'a',
                     attrs: {
                         href: '#',
+                        draggable: 'false',
                     },
                     childs: [{
                         name: 'span'
@@ -138,7 +154,9 @@ class AllBoomsCommentsWidget extends HTMLElement{
         const input = inputAndButtonWrapper.children[0];
         const button = inputAndButtonWrapper.children[1];
         const buttonInnerSpan = button.children[0];
-        currentUser().then(user => {
+        (async () => {
+            await locationProcess;
+            const user = await currentUser();
             if(user){
                 input.setAttribute('placeholder', dictionary.placeholder);
                 buttonInnerSpan.innerText = dictionary.submitText;
@@ -154,49 +172,49 @@ class AllBoomsCommentsWidget extends HTMLElement{
                         input.disabled = false;
                         button.classList.remove('disabled');
                     });
-                })
+                });
+                (async function requestComments(){
+                    const comments = await API.comments.external.list({
+                        app_id: appID,
+                        widget_id: widgetID,
+                        after: table.table_body.lastElementChild ? table.table_body.lastElementChild.getAttribute('commentid') : undefined,
+                    });
+                    const requestData = {
+                        token: currentToken(),
+                        list: comments.map(({userid}) => userid).filter(onlyUnique)
+                    };
+                    const userInfo = await API.user.getInfo(requestData);
+                    console.log({ userInfo, comments, requestData });
+                    comments.forEach(({ id, userid, text, timestamp }) => {
+                        table.prepend({
+                            id,
+                            text,
+                            time: timestamp,
+                            uid: userid,
+                            name: userInfo[userid].fullName,
+                            avatar: userInfo[userid].avatar,
+                        })
+                    });
+                    setTimeout(requestComments, 200000)
+                })()
             } else {
                 input.setAttribute('placeholder', dictionary.userNotLogged);
                 input.disabled = true;
                 button.classList.add('login-highlight');
                 buttonInnerSpan.innerText = dictionary.login;
-                button.insertBefore(new AllboomsBrandIcon('allbooms'), button.childNodes[0]);
+                buttonInnerSpan.append(' ', new AllboomsBrandIcon('allbooms'));
                 button.addEventListener('click', e => {
+                    const loc = new Link(location.href);
+                    loc.params.save_allbooms_token = '';
                     e.preventDefault();
-                    location.href = `${APIReference.baseHost}/getToken?callback=${encodeURIComponent(loc.href)}&appid=${encodeURIComponent(appID)}`
+                    location.href = `https://${APIReference.baseHost}/getToken?callback=${encodeURIComponent(loc.href)}&appid=${encodeURIComponent(appID)}`
                 })
             }
             [
                 inputAndButtonWrapper,
                 table.table,
-            ].forEach(element => shadow.appendChild(element));
-            (async function requestComments(){
-                const comments = await API.comments.external.list({
-                    app_id: appID,
-                    widget_id: widgetID,
-                    after: table.table_body.lastElementChild ? table.table_body.lastElementChild.getAttribute('commentid') : undefined
-                });
-                const userInfo = await API.user.getInfo({
-                    token: currentToken(),
-                    list: comments.map(({userid}) => userid).filter(onlyUnique)
-                });
-                console.log({ userInfo, comments, requestData: {
-                    token: currentToken(),
-                    list: comments.map(({userid}) => userid).filter(onlyUnique)
-                } });
-                comments.forEach(({ id, userid, text, timestamp }) => {
-                    table.prepend({
-                        id,
-                        text,
-                        time: timestamp,
-                        uid: userid,
-                        name: userInfo[userid].fullName,
-                        avatar: userInfo[userid].avatar,
-                    })
-                });
-                setTimeout(requestComments, 200000)
-            })()
-        })
+            ].forEach(element => shadow.appendChild(element))
+        })()
     }
 }
 

@@ -167,14 +167,14 @@ export function htmlSafeText(text){
 
 export function currentUser(){
     return new Promise(resolve => {
-        const token = Cookies.get('allbooms_token');
-        if(!token) resolve(null); else API.user.getMe({ token }).then(resolve).catch(() => resolve(null))
+        const token = currentToken();
+        if(!token) resolve(null);
+        else API.user.getMe({ token }).then(resolve).catch(() => resolve(null))
     })
 }
 
-export function currentToken(){
-    return Cookies.get('allbooms_token')
-}
+export const currentToken = () => Cookies.get('allbooms_token');
+currentToken.save = token => Cookies.set('allbooms_token', token);
 
 export function argsEncode(args){
     var res = [];

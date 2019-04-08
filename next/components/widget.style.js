@@ -2,7 +2,7 @@ import CSSRuleSet from '../internal/CSSProcessor.js'
 
 const defaultFontSize = 12;
 const defaultFontFamily = "'Roboto', sans-serif";
-const buttonWidth = 64;
+const buttonWidth = 80;
 const input_and_button_borderBottomWidth = 2;
 const inputHeight = 40;
 const tablePadding = 5;
@@ -45,6 +45,7 @@ export default class {
             [commentAvatarTdSelector]: avatar_td,
             [commentAvatarTdSelector + ' > img']: avatar,
             [commentSecondRowSelector + ' > td']: commentRow,
+            'allbooms-icon': allboomsIcon,
         } = ruleSetsPrecached;
 
         _all.add({
@@ -103,6 +104,7 @@ export default class {
             top: '50%',
             left: '50%',
             transform: 'translate(-50%, -50%)',
+            'white-space': 'nowrap',
         });
 
         button_disabled.add({
@@ -146,6 +148,10 @@ export default class {
 
         commentRow.add({
             'line-height': '1em !important',
+        });
+
+        allboomsIcon.add({
+            'font-size': 14,
         });
 
         setTimeout(() => input_and_button.add('transition', transitionDuration * 1000 + 'ms'), 100);
