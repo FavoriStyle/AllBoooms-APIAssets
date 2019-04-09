@@ -5,7 +5,6 @@ const RuleProp = Symbol();
 const RuleVal = Symbol();
 const Sheet = Symbol();
 const Set = Symbol();
-const Rule = Symbol();
 const RuleSetInnerHTML = Symbol();
 const CalcRuleProps = Symbol();
 const tab = (() => {
@@ -23,9 +22,7 @@ export class CSSRule{
         this[RuleID] = `${prop}_${rand()}_${rand()}`;
         this[RuleProp] = prop;
         this[Set] = ruleset;
-        this[Rule] = this;
         this.set(val);
-        return new Proxy(this[Rule], {});
     }
     [Symbol.toPrimitive](){
         return `${this[RuleProp]}: ${typeof this[RuleVal] == 'number' && this[RuleVal] !== 0 ? this[RuleVal] + 'px' : this[RuleVal]};`
@@ -50,7 +47,6 @@ export class CSSRule{
         parts2.shift();
         parts[1] = parts2.join('\n');
         this[Set][RuleSetInnerHTML] = parts.join('');
-        this[Rule] = null;
         this[Set][Set].arr.splice(this[Set][Set].store[this[RuleProp]], 1)
     }
 }
