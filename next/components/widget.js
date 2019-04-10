@@ -26,49 +26,28 @@ function onlyUnique(value, index, self){
     return self.indexOf(value) === index
 }
 
-const createElementInTableBody = (({children: {0: table_body}}) => {
-    return options => {
-        table_body.innerHTML = createElement.src(options);
-        return table_body.removeChild(table_body.children[0] || table_body.childNodes[0])
-    }
-})(createElement({
-    name: 'table',
-    childs: [{
-        name: 'tbody'
-    }]
-}));
-
 class CommentsTable{
-    constructor(){
-        this.table = createElement({
-            name: 'table',
-            childs: [{
-                name: 'tbody'
-            }]
-        });
-        this.table_body = this.table.children[0]
+    constructor(root){
+        this.root = root;
     }
     static _generateElement({ id, uid, avatar, name, text, time }){
-        const newChild = createElementInTableBody({
-            name: 'tr',
+        return createElement({
+            name: 'div',
             attrs: {
                 commentid: id,
             },
             childs: [
                 {
-                    name: 'td',
+                    name: 'img',
                     attrs: {
-                        rowspan: 2,
+                        src: avatar,
                     },
-                    childs: [{
-                        name: 'img',
-                        attrs: {
-                            src: avatar,
-                        },
-                    }],
                 },
                 {
-                    name: 'td',
+                    name: 'div',
+                    attrs: {
+                        class: 'name',
+                    },
                     childs: [{
                         name: 'a',
                         attrs: {
@@ -78,32 +57,32 @@ class CommentsTable{
                     }],
                 },
                 {
-                    name: 'td',
-                    html: normalizeDate(time),
+                    name: 'div',
+                    attrs: {
+                        class: 'time',
+                    },
+                    html: normalizeDate(time)
+                },
+                {
+                    name: 'div',
+                    attrs: {
+                        class: 'comment',
+                    },
+                    html: htmlSafeText(text)
                 },
             ],
-        });
-        const nextChild = createElementInTableBody({
-            name: 'tr',
-            childs: [{
-                name: 'td',
-                html: htmlSafeText(text),
-                attrs: {
-                    colspan: 2
-                },
-            }],
-        });
-        return [newChild, nextChild]
+        })
     }
     prepend({ id, uid, avatar, name, text, time }){
-        const [ newChild, nextChild ] = CommentsTable._generateElement({ id, uid, avatar, name, text, time });
-        this.table_body.children[0] ? this.table_body.insertBefore(nextChild, this.table_body.children[0]) : this.table_body.appendChild(nextChild);
-        this.table_body.insertBefore(newChild, nextChild)
+        this._lastId = id;
+        const child = CommentsTable._generateElement({ id, uid, avatar, name, text, time });
+        const firstComment = this.root.querySelector('div[commentid]');
+        firstComment ? this.root.insertBefore(child, firstComment) : this.root.appendChild(child)
     }
     append({ id, uid, avatar, name, text, time }){
-        const [ newChild, nextChild ] = CommentsTable._generateElement({ id, uid, avatar, name, text, time });
-        this.table_body.appendChild(newChild);
-        this.table_body.appendChild(nextChild);
+        this._lastId = id;
+        const child = CommentsTable._generateElement({ id, uid, avatar, name, text, time });
+        this.root.appendChild(child)
     }
 }
 
@@ -126,7 +105,6 @@ class AllBoomsCommentsWidget extends HTMLElement{
         // inputWidth instanceof CSSCalcRule === true
         //inputWidth.secondArg = '64px';
         //buttonWidth.set(inputWidth.secondArg);
-        const table = new CommentsTable;
         const inputAndButtonWrapper = createElement({
             name: 'div',
             attrs: {
@@ -151,9 +129,16 @@ class AllBoomsCommentsWidget extends HTMLElement{
                 },
             ]
         });
+        const commentsWrapper = createElement({
+            name: 'div',
+            attrs: {
+                class: 'comments-wrapper',
+            },
+        });
         const input = inputAndButtonWrapper.children[0];
         const button = inputAndButtonWrapper.children[1];
         const buttonInnerSpan = button.children[0];
+        const table = new CommentsTable(commentsWrapper);
         (async () => {
             await locationProcess;
             const user = await currentUser();
@@ -177,7 +162,7 @@ class AllBoomsCommentsWidget extends HTMLElement{
                     const requestData = {
                         app_id: appID,
                         widget_id: widgetID,
-                        after: table.table_body.firstElementChild ? table.table_body.firstElementChild.getAttribute('commentid') : undefined,
+                        after: table._lastId,
                         reversed: true,
                     };
                     const comments = await API.comments.external.list(requestData);
@@ -212,10 +197,7 @@ class AllBoomsCommentsWidget extends HTMLElement{
                     location.href = `https://${APIReference.baseHost}/getToken?callback=${encodeURIComponent(loc.href)}&appid=${encodeURIComponent(appID)}`
                 })
             }
-            [
-                inputAndButtonWrapper,
-                table.table,
-            ].forEach(element => shadow.appendChild(element))
+            shadow.append(inputAndButtonWrapper, commentsWrapper)
         })()
     }
 }
@@ -224,8 +206,9 @@ const cssVars = (() => {
     const cssVars = {
         'border-radius': 2,
         'width': 280,
+        'height': 400,
         'theme-color': '#00b1b3',
-        'highlighted-text-color': '#fff'
+        'highlighted-text-color': '#fff',
     };
     var res = '';
     for(var i in cssVars) res += `--${i}:${typeof cssVars[i] == 'number' ? cssVars[i] + 'px' : cssVars[i]};`;

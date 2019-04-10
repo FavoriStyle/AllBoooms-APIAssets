@@ -12,6 +12,7 @@ const borderRadius = 'var(--border-radius)';
 const borderColor = 'darkgrey';
 const transitionDuration = .5; //s
 const avatarWidthHeight = 42;
+const height = 'var(--height)';
 
 export default class {
     constructor(stylesRoot){
@@ -26,15 +27,14 @@ export default class {
         })();
 
         const buttonSelector = 'input + a';
-        const commentFirstRowSelector = 'tr:nth-child(odd)';
-        const commentAvatarTdSelector = commentFirstRowSelector + ' > td:first-child';
-        const commentSecondRowSelector = 'tr:nth-child(even)';
+        const tableSelector = '.comments-wrapper';
+        const commentSelector = tableSelector + ' > div';
 
         const {
             '*': _all,
-            table,
-            td,
-            a,
+            [tableSelector]: table,
+            a: link,
+            'a:active': link_active,
             input,
             [buttonSelector]: button,
             [buttonSelector + ' > span']: button_inner_span,
@@ -43,11 +43,12 @@ export default class {
             '.input-and-button-wrapper': input_and_button_wrapper,
             [buttonSelector + ', input']: input_and_button,
             'input:focus': focused_input,
-            [commentAvatarTdSelector]: avatar_td,
-            [commentFirstRowSelector + ' > td:nth-child(2)']: name_td,
-            [commentAvatarTdSelector + ' > img']: avatar,
-            [commentSecondRowSelector + ' > td']: commentRow,
             'allbooms-icon': allboomsIcon,
+            [commentSelector]: comment,
+            [commentSelector + ' > img']: avatar,
+            [commentSelector + ' > .name']: name,
+            [commentSelector + ' > .time']: time,
+            [commentSelector + ' > .comment']: comment_text,
         } = ruleSetsPrecached;
 
         _all.add({
@@ -116,7 +117,7 @@ export default class {
 
         button_click.add({
             'background-color': '#fff',
-            'border-bottom-color': '#fff',
+            'border-bottom-color': borderColor,
             color: themeColor,
         });
 
@@ -126,51 +127,61 @@ export default class {
             'border-radius': borderRadius,
             'border-top-left-radius': 0,
             'border-top-right-radius': 0,
-            width,
+            width: {
+                ruleType: 'calc',
+                firstArg: width,
+                operator: '-',
+                secondArg: (tablePadding * 2) + 'px',
+            },
+            height,
+            overflow: 'auto',
         });
 
-        td.add({
-            'line-height': '0.8em',
-        });
-
-        a.add({
-            color: themeColor,
+        link.add({
+            color: 'inherit',
             'text-decoration': 'none',
+            outline: 'none',
         });
 
-        avatar_td.add({
-            width: avatarWidthHeight,
-            'vertical-align': 'top',
+        link_active.add({
+            outline: 'none',
+        });
+
+        comment.add({
+            width: '100%',
+            display: 'grid',
+            'grid-template-columns': `${avatarWidthHeight}px auto auto`,
+            'grid-template-areas': "'avatar name time' 'avatar comment comment'",
+            'margin-bottom': tablePadding,
         });
 
         avatar.add({
-            width: '100%',
+            width: avatarWidthHeight,
             'border-radius': '50%',
+            'grid-area': 'avatar',
         });
 
-        commentRow.add({
-            'line-height': '1em !important',
+        name.add({
+            'white-space': 'nowrap',
+            overflow: 'hidden',
+            'text-overflow': 'ellipsis',
+            'grid-area': 'name',
+            color: themeColor,
+            'line-height': '0.8em',
+        });
+
+        time.add({
+            'grid-area': 'time',
+            'text-align': 'right',
+            'line-height': '0.8em',
+        });
+
+        comment_text.add({
+            'grid-area': 'comment',
         });
 
         allboomsIcon.add({
             'font-size': 14,
-        });
-
-        name_td.add({
-            'max-width': {
-                ruleType: 'calc',
-                firstArg: {
-                    ruleType: 'calc',
-                    firstArg: width,
-                    operator: '-',
-                    secondArg: avatarWidthHeight + 'px'
-                },
-                operator: '-',
-                secondArg: 98 + 'px'
-            },
-            overflow: 'hidden',
-            'text-overflow': 'ellipsis',
-            'white-space': 'nowrap',
         });
 
         setTimeout(() => input_and_button.add('transition', transitionDuration * 1000 + 'ms'), 100);
