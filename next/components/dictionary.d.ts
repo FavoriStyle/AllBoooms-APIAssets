@@ -1,16 +1,13 @@
-import * as _Dictionary from './dictionary'
+type DictionaryWords =
+      'placeholder'
+    | 'submitText'
+    | 'submittingText'
+    | 'userNotLogged'
+    | 'login'
+    | 'noCommentText'
 
-type Omit<T, K> = Pick<T, Exclude<keyof T, K>>
-
-const Dictionary: Omit<typeof _Dictionary, 'default'>
-export default Dictionary
-
-interface Dict{
-    placeholder: string
-    submitText: string
-    submittingText: string
-    userNotLogged: string
-    login: string
+export type Dictionary = {
+    [T in DictionaryWords]: string
 }
 
-export const ru: Dict
+export const ru: Dictionary

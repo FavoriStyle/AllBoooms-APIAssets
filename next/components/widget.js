@@ -1,6 +1,6 @@
 import APIReference from '../internal/APIref.js'
 import { createElement, htmlSafeText, normalizeDate, currentUser, Link, currentToken, argsEncode, argsDecode } from '../internal/_system.js'
-import Dictionary from './dictionary.js'
+import * as Dictionary from './dictionary.js'
 import WidgetStyle from './widget.style.js'
 import AllboomsBrandIcon from '../internal/allbooms-brand-icons/index.js';
 
@@ -87,7 +87,7 @@ class CommentsTable{
 }
 
 class AllBoomsCommentsWidget extends HTMLElement{
-    /** @typedef {Dictionary['ru']} _Dict */
+    /** @typedef {Dictionary.Dictionary} Dictionary */
     constructor(){
         super();
         const appID = decodeURIComponent(this.getAttribute('data-appid'));
@@ -96,7 +96,7 @@ class AllBoomsCommentsWidget extends HTMLElement{
             lang: decodeURIComponent(this.getAttribute('data-lang') || 'ru'),
             strings: argsDecode(this.getAttribute('data-strings')),
         };
-        /** @type {_Dict} */
+        /** @type {Dictionary} */
         const dictionary = Dictionary[options.lang];
         const shadow = this.attachShadow({mode: 'closed'});
         this.styles = new WidgetStyle(shadow);
@@ -146,17 +146,21 @@ class AllBoomsCommentsWidget extends HTMLElement{
                 input.setAttribute('placeholder', dictionary.placeholder);
                 buttonInnerSpan.innerText = dictionary.submitText;
                 button.addEventListener('click', () => {
-                    input.disabled = true;
-                    button.classList.add('disabled');
-                    API.comments.external.add({
-                        token: currentToken(),
-                        widget_id: widgetID,
-                        text: input.value,
-                    }).then(({ id, timestamp }) => {
-                        input.value = '';
-                        input.disabled = false;
-                        button.classList.remove('disabled');
-                    });
+                    if(input.value){
+                        input.disabled = true;
+                        button.classList.add('disabled');
+                        API.comments.external.add({
+                            token: currentToken(),
+                            widget_id: widgetID,
+                            text: input.value,
+                        }).then(({ id, timestamp }) => {
+                            input.value = '';
+                            input.disabled = false;
+                            button.classList.remove('disabled');
+                        })
+                    } else {
+                        alert(dictionary.noCommentText)
+                    }
                 });
                 (async function requestComments(){
                     const requestData = {
