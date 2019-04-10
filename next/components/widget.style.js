@@ -28,7 +28,7 @@ export default class {
 
         const buttonSelector = 'input + a';
         const tableSelector = '.comments-wrapper';
-        const commentSelector = tableSelector + ' > div';
+        const commentSelector = tableSelector + ' > div[commentid]';
 
         const {
             '*': _all,
@@ -135,6 +135,7 @@ export default class {
             },
             height,
             overflow: 'auto',
+            position: 'relative',
         });
 
         link.add({

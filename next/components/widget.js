@@ -2,7 +2,10 @@ import APIReference from '../internal/APIref.js'
 import { createElement, htmlSafeText, normalizeDate, currentUser, Link, currentToken, argsEncode, argsDecode } from '../internal/_system.js'
 import * as Dictionary from './dictionary.js'
 import WidgetStyle from './widget.style.js'
-import AllboomsBrandIcon from '../internal/allbooms-brand-icons/index.js';
+import AllboomsBrandIcon from '../internal/allbooms-brand-icons/index.js'
+import PerfectScrollbar from './PerfectScrollbar.js'
+
+const requestTimeout = 2000;
 
 const API = new APIReference;
 
@@ -21,10 +24,6 @@ const locationProcess = (async () => {
         window.history.pushState(null, null, loc.href);
     }
 })();
-
-function onlyUnique(value, index, self){ 
-    return self.indexOf(value) === index
-}
 
 class CommentsTable{
     constructor(root){
@@ -86,12 +85,29 @@ class CommentsTable{
     }
 }
 
+const userStorage = Symbol();
+
+function setIntervalForAsync(f, t){
+    function f2(){
+        f().then(nextCycle)
+    }
+    var nextCycle = setTimeout.bind(null, f2, t);
+    f2()
+}
+
+function _getCommentId(elem){
+    if(elem){
+        return elem.getAttribute('commentid')
+    }
+}
+
 class AllBoomsCommentsWidget extends HTMLElement{
     /** @typedef {Dictionary.Dictionary} Dictionary */
     constructor(){
         super();
-        const appID = decodeURIComponent(this.getAttribute('data-appid'));
-        const widgetID = decodeURIComponent(this.getAttribute('data-widgetid'));
+        this.appID = decodeURIComponent(this.getAttribute('data-appid'));
+        this.widgetID = decodeURIComponent(this.getAttribute('data-widgetid'));
+        this[userStorage] = {};
         const options = {
             lang: decodeURIComponent(this.getAttribute('data-lang') || 'ru'),
             strings: argsDecode(this.getAttribute('data-strings')),
@@ -138,7 +154,19 @@ class AllBoomsCommentsWidget extends HTMLElement{
         const input = inputAndButtonWrapper.children[0];
         const button = inputAndButtonWrapper.children[1];
         const buttonInnerSpan = button.children[0];
-        const table = new CommentsTable(commentsWrapper);
+        this.table = new CommentsTable(commentsWrapper);
+        // scrollbar processing
+        (async () => {
+            const scrollbar = await new PerfectScrollbar(commentsWrapper, { root: shadow });
+            commentsWrapper.addEventListener('ps-scroll-y', async () => {
+                if(commentsWrapper.getBoundingClientRect().bottom - commentsWrapper.children[commentsWrapper.children.length - 11].getBoundingClientRect().y >= 0 && !this._requestBusy){
+                    this._requestBusy = true;
+                    await this.requestComments();
+                    this._requestBusy = false
+                }
+            })
+        })();
+        // user processing
         (async () => {
             await locationProcess;
             const user = await currentUser();
@@ -151,7 +179,7 @@ class AllBoomsCommentsWidget extends HTMLElement{
                         button.classList.add('disabled');
                         API.comments.external.add({
                             token: currentToken(),
-                            widget_id: widgetID,
+                            widget_id: this.widgetID,
                             text: input.value,
                         }).then(({ id, timestamp }) => {
                             input.value = '';
@@ -162,32 +190,10 @@ class AllBoomsCommentsWidget extends HTMLElement{
                         alert(dictionary.noCommentText)
                     }
                 });
-                (async function requestComments(){
-                    const requestData = {
-                        app_id: appID,
-                        widget_id: widgetID,
-                        after: table._lastId,
-                        reversed: true,
-                    };
-                    const comments = await API.comments.external.list(requestData);
-                    console.log({ comments, requestData });
-                    const userInfo = await API.user.getInfo({
-                        token: currentToken(),
-                        list: comments.map(({userid}) => userid).filter(onlyUnique),
-                        
-                    });
-                    comments.forEach(({ id, userid, text, timestamp }) => {
-                        table.prepend({
-                            id,
-                            text,
-                            time: timestamp,
-                            uid: userid,
-                            name: userInfo[userid].fullName,
-                            avatar: userInfo[userid].avatar,
-                        })
-                    });
-                    setTimeout(requestComments, 2000)
-                })()
+                this._requestBusy = true;
+                await this.requestComments();
+                this._requestBusy = false;
+                setTimeout(this.listenForComments.bind(this), requestTimeout)
             } else {
                 input.setAttribute('placeholder', dictionary.userNotLogged);
                 input.disabled = true;
@@ -198,11 +204,50 @@ class AllBoomsCommentsWidget extends HTMLElement{
                     const loc = new Link(location.href);
                     loc.params.save_allbooms_token = '';
                     e.preventDefault();
-                    location.href = `https://${APIReference.baseHost}/getToken?callback=${encodeURIComponent(loc.href)}&appid=${encodeURIComponent(appID)}`
+                    location.href = `https://${APIReference.baseHost}/getToken?callback=${encodeURIComponent(loc.href)}&appid=${encodeURIComponent(this.appID)}`
                 })
             }
             shadow.append(inputAndButtonWrapper, commentsWrapper)
         })()
+    }
+    getFirstCommentId(){
+        return _getCommentId(this.table.root.querySelector('div[commentid]'))
+    }
+    getLastCommentId(){
+        const list = this.table.root.querySelectorAll('div[commentid]');
+        return _getCommentId(list[list.length - 1])
+    }
+    async requestComments(reversed = false){
+        const onNewComment = this.onNewComment.bind(this, reversed ? 'prepend' : 'append');
+        const requestData = {
+            app_id: this.appID,
+            widget_id: this.widgetID,
+            after: reversed ? this.getFirstCommentId(): this.getLastCommentId(),
+            reversed,
+        };
+        const comments = await API.comments.external.list(requestData);
+        comments.forEach(onNewComment)
+    }
+    async userInfo(uid){
+        if(!this[userStorage][uid]) Object.assign(this[userStorage], await API.user.getInfo({
+            token: currentToken(),
+            list: [uid],
+        }));
+        return this[userStorage][uid]
+    }
+    async onNewComment(mode, { id, userid, text, timestamp }){
+        const { fullName: name, avatar } = await this.userInfo(userid);
+        this.table[mode]({
+            id,
+            text,
+            time: timestamp,
+            uid: userid,
+            name,
+            avatar,
+        })
+    }
+    listenForComments(){
+        setIntervalForAsync(this.requestComments.bind(this, true), requestTimeout)
     }
 }
 
