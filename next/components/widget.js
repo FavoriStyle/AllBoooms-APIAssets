@@ -229,11 +229,11 @@ class AllBoomsCommentsWidget extends HTMLElement{
         comments.forEach(onNewComment)
     }
     async userInfo(uid){
-        if(!this[userStorage][uid]) Object.assign(this[userStorage], await API.user.getInfo({
+        if(!this[userStorage][uid]) this[userStorage][uid] = API.user.getInfo({
             token: currentToken(),
             list: [uid],
-        }));
-        return this[userStorage][uid]
+        }).then(({[uid]: _}) => _);
+        return await this[userStorage][uid]
     }
     async onNewComment(mode, { id, userid, text, timestamp }){
         const { fullName: name, avatar } = await this.userInfo(userid);
