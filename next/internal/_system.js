@@ -62,11 +62,11 @@ export const normalizeDate = (() => {
         date = checkDate(date);
         const now = new Date;
         const today = dayStart(now);
-        const tomorrow = today + day;
+        const yesterday = today - day;
         const diff = now - date;
         dictionary = Object.assign({}, defaultDict, dictionary);
         if(diff < day) return timeBefore(diff, dictionary);
-        else if(today <= date && tomorrow > date) return dictionary.yesterday;
+        else if(today > date && yesterday < date) return dictionary.yesterday;
         else return formatDate(now, date, dictionary)
     }
 })();
