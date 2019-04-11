@@ -34,8 +34,12 @@ class CommentsTable{
     constructor(root){
         this.root = root;
     }
+    static _dateUpdate(elem, time){
+        const _ = normalizeDate(time);
+        if(elem.innerText !== _) elem.innerText = _
+    }
     static _generateElement({ id, uid, avatar, name, text, time }){
-        return createElement({
+        const elem = createElement({
             name: 'div',
             attrs: {
                 commentid: id,
@@ -75,15 +79,22 @@ class CommentsTable{
                     html: htmlSafeText(text)
                 },
             ],
-        })
+        });
+        setInterval(this._dateUpdate.bind(null, elem.children[2], time), 1000);
+        return elem
+    }
+    _commentAlreadyThere(id){
+        return !!this.root.querySelector(`div[commentid="${id}"]`)
     }
     prepend({ id, uid, avatar, name, text, time }){
+        if(this._commentAlreadyThere(id)) return;
         this._lastId = id;
         const child = CommentsTable._generateElement({ id, uid, avatar, name, text, time });
         const firstComment = this.root.querySelector('div[commentid]');
         firstComment ? this.root.insertBefore(child, firstComment) : this.root.appendChild(child)
     }
     append({ id, uid, avatar, name, text, time }){
+        if(this._commentAlreadyThere(id)) return;
         this._lastId = id;
         const child = CommentsTable._generateElement({ id, uid, avatar, name, text, time });
         this.root.appendChild(child)
@@ -169,10 +180,11 @@ class AllBoomsCommentsWidget extends HTMLElement{
         // scrollbar processing
         (async () => {
             const scrollbar = await new PerfectScrollbar(commentsWrapper, { root: shadow });
+            var needNextCycle = true;
             commentsWrapper.addEventListener('ps-scroll-y', async () => {
-                if(commentsWrapper.getBoundingClientRect().bottom - commentsWrapper.children[commentsWrapper.children.length - 11].getBoundingClientRect().y >= 0 && !this._requestBusy){
+                if(needNextCycle && commentsWrapper.getBoundingClientRect().bottom - commentsWrapper.children[commentsWrapper.children.length - 11].getBoundingClientRect().y >= 0 && !this._requestBusy){
                     this._requestBusy = true;
-                    await this.requestComments();
+                    if(!await this.requestComments()) needNextCycle = false;
                     this._requestBusy = false
                 }
             })
@@ -237,7 +249,8 @@ class AllBoomsCommentsWidget extends HTMLElement{
             reversed,
         };
         const comments = await API.comments.external.list(requestData);
-        comments.forEach(onNewComment)
+        comments.forEach(onNewComment);
+        return comments.length;
     }
     /** @param {string} uid */
     userInfo(uid){
@@ -300,8 +313,7 @@ customElements.define('allbooms-comments', AllBoomsCommentsWidget);
 export default class {
     constructor(appID, widgetID, options){
         options = options || {};
-        /** @type {AllBoomsCommentsWidget} */
-        const element = createElement({
+        return createElement({
             name: 'allbooms-comments',
             attrs: {
                 'data-appid': encodeURIComponent(appID),
@@ -310,7 +322,6 @@ export default class {
                 'data-lang': encodeURIComponent(options.lang || ''),
                 style: cssVars,
             }
-        });
-        return element
+        })
     }
 }

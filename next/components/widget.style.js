@@ -169,16 +169,21 @@ export default class {
             'grid-area': 'name',
             color: themeColor,
             'line-height': '0.8em',
+            'padding-left': tablePadding,
+            'padding-right': tablePadding,
         });
 
         time.add({
             'grid-area': 'time',
             'text-align': 'right',
             'line-height': '0.8em',
+            'padding-right': tablePadding,
         });
 
         comment_text.add({
             'grid-area': 'comment',
+            'padding-left': tablePadding,
+            'padding-right': tablePadding,
         });
 
         allboomsIcon.add({
