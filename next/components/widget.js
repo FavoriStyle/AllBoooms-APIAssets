@@ -1,9 +1,14 @@
 import APIReference from '../internal/APIref.js'
-import { createElement, htmlSafeText, normalizeDate, currentUser, Link, currentToken, argsEncode, argsDecode } from '../internal/_system.js'
+import { createElement, htmlSafeText, normalizeDate, currentUser, Link, currentToken, argsEncode, argsDecode, Awaiter, wait } from '../internal/_system.js'
 import * as Dictionary from './dictionary.js'
 import WidgetStyle from './widget.style.js'
 import AllboomsBrandIcon from '../internal/allbooms-brand-icons/index.js'
 import PerfectScrollbar from './PerfectScrollbar.js'
+
+/**
+ * @typedef {T extends Promise<infer R> ? R : T} Unpromisify
+ * @template T
+ */
 
 const requestTimeout = 2000;
 
@@ -107,7 +112,13 @@ class AllBoomsCommentsWidget extends HTMLElement{
         super();
         this.appID = decodeURIComponent(this.getAttribute('data-appid'));
         this.widgetID = decodeURIComponent(this.getAttribute('data-widgetid'));
-        this[userStorage] = {};
+        const createUserStorage = (function(){
+            this[userStorage] = Object.assign([], {
+                awaiters: {},
+                clear: createUserStorage,
+            })
+        }).bind(this);
+        createUserStorage();
         const options = {
             lang: decodeURIComponent(this.getAttribute('data-lang') || 'ru'),
             strings: argsDecode(this.getAttribute('data-strings')),
@@ -228,12 +239,33 @@ class AllBoomsCommentsWidget extends HTMLElement{
         const comments = await API.comments.external.list(requestData);
         comments.forEach(onNewComment)
     }
-    async userInfo(uid){
-        if(!this[userStorage][uid]) this[userStorage][uid] = API.user.getInfo({
-            token: currentToken(),
-            list: [uid],
-        }).then(({[uid]: _}) => _);
-        return await this[userStorage][uid]
+    /** @param {string} uid */
+    userInfo(uid){
+        /** @type {string[] & { awaiters: Object<string, Awaiter<Unpromisify<ReturnType<typeof API.user.getInfo>>['']>>, clear(): void }} */
+        const storage = this[userStorage];
+        storage.latest = uid;
+        if(!storage.awaiters[uid]){
+            storage.awaiters[uid] = new Awaiter;
+            storage.push(uid);
+            wait(20).then(() => {
+                if(storage.latest === uid){
+                    storage.clear();
+                    API.user.getInfo({
+                        token: currentToken(),
+                        list: storage,
+                    }).then(info => {
+                        storage.forEach(uid => {
+                            storage.awaiters[uid].resolve(info[uid])
+                        })
+                    }).catch(e => {
+                        storage.forEach(uid => {
+                            storage.awaiters[uid].reject(e)
+                        })
+                    })
+                }
+            })
+        }
+        return storage.awaiters[uid]
     }
     async onNewComment(mode, { id, userid, text, timestamp }){
         const { fullName: name, avatar } = await this.userInfo(userid);
