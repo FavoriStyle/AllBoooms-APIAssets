@@ -285,3 +285,24 @@ export function waitForProp(obj, prop, ...excludedValues){
         })
     })
 }
+
+function nonchangeablePropDescriptor(val){
+    return {
+        configurable: false,
+        writable: false,
+        value: val,
+    }
+}
+
+export class Awaiter{
+    constructor(){
+        var resolve,
+            reject,
+            promise = new Promise((_, $) => { resolve = _; reject = $ });
+        Object.defineProperties(promise, {
+            resolve: nonchangeablePropDescriptor(resolve),
+            reject: nonchangeablePropDescriptor(reject),
+        })
+        return promise
+    }
+}
