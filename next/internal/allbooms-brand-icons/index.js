@@ -1,13 +1,14 @@
 import { createElement, waitForProp } from '../_system.js'
 /** @type {Object<string, Promise<Element>>} */
 const importCache = {};
+const defaultWH = 16.933;
 
-function pathToIcon(path){
+function pathToIcon({ default: path, width, height }){
     return createElement({
         name: 'svg',
         attrs: {
             xmlns: 'http://www.w3.org/2000/svg',
-            viewBox: '0 0 16.933 16.933',
+            viewBox: `0 0 ${width || defaultWH} ${height || defaultWH}`,
             style: 'height: 1em; fill: currentColor',
         },
         childs: [{
@@ -44,7 +45,7 @@ class AllboomsBrandIcon extends HTMLElement{
         const root = roots.get(this);
         root.innerHTML = '';
         if(registeredNames[name]){
-            if(!importCache[name]) importCache[name] = import('./' + registeredNames[name] + '.js').then(({ default: p }) => pathToIcon(p));
+            if(!importCache[name]) importCache[name] = import('./' + registeredNames[name] + '.js').then(p => pathToIcon(p));
             importCache[name].then(elem => root.appendChild(elem));
             this[Free] = true;
         }
