@@ -212,11 +212,7 @@ class AllBoomsCommentsWidget extends HTMLElement{
                     } else {
                         alert(dictionary.noCommentText)
                     }
-                });
-                this._requestBusy = true;
-                await this.requestComments();
-                this._requestBusy = false;
-                setTimeout(this.listenForComments.bind(this), requestTimeout)
+                })
             } else {
                 input.setAttribute('placeholder', dictionary.userNotLogged);
                 input.disabled = true;
@@ -231,6 +227,13 @@ class AllBoomsCommentsWidget extends HTMLElement{
                 })
             }
             shadow.append(inputAndButtonWrapper, commentsWrapper)
+        })();
+        // comments request
+        (async () => {
+            this._requestBusy = true;
+            await this.requestComments();
+            this._requestBusy = false;
+            setTimeout(this.listenForComments.bind(this), requestTimeout)
         })()
     }
     getFirstCommentId(){
@@ -264,7 +267,6 @@ class AllBoomsCommentsWidget extends HTMLElement{
                 if(storage.latest === uid){
                     storage.clear();
                     API.user.getInfo({
-                        token: currentToken(),
                         list: storage,
                     }).then(info => {
                         storage.forEach(uid => {
