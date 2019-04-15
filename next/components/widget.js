@@ -219,7 +219,7 @@ class AllBoomsCommentsWidget extends HTMLElement{
                 input.disabled = true;
                 button.classList.add('login-highlight');
                 buttonInnerSpan.innerText = dictionary.login;
-                buttonInnerSpan.append(' ', new AllboomsBrandIcon('allbooms'));
+                buttonInnerSpan.append(' ', new AllboomsBrandIcon('allbooms-login'));
                 button.addEventListener('click', e => {
                     const loc = new Link(location.href);
                     loc.params.save_allbooms_token = '';
