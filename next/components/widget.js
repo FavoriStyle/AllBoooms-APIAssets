@@ -2,9 +2,9 @@ import APIReference from '../internal/APIref.js'
 import { createElement, htmlSafeText, normalizeDate, currentUser, Link, currentToken, argsEncode, argsDecode, Awaiter, wait } from '../internal/_system.js'
 import * as Dictionary from './dictionary.js'
 import WidgetStyle from './widget.style.js'
-import AllboomsBrandIcon from '../internal/allbooms-brand-icons/index.js'
 import PerfectScrollbar from './PerfectScrollbar.js'
 import '../internal/roboto.js'
+import '../internal/allbooms-brand-icons.js'
 
 /**
  * @typedef {T extends Promise<infer R> ? R : T} Unpromisify
@@ -219,7 +219,6 @@ class AllBoomsCommentsWidget extends HTMLElement{
                 input.disabled = true;
                 button.classList.add('login-highlight');
                 buttonInnerSpan.innerText = dictionary.login;
-                buttonInnerSpan.append(' ', new AllboomsBrandIcon('allbooms-login'));
                 button.addEventListener('click', e => {
                     const loc = new Link(location.href);
                     loc.params.save_allbooms_token = '';

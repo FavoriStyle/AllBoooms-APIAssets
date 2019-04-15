@@ -2,7 +2,7 @@ import CSSRuleSet from '../internal/CSSProcessor.js'
 
 const defaultFontSize = 12;
 const defaultFontFamily = "'Roboto', sans-serif";
-const buttonWidth = 80;
+const buttonWidth = 44;
 const input_and_button_borderBottomWidth = 2;
 const inputHeight = 40;
 const tablePadding = 5;
@@ -38,6 +38,7 @@ export default class {
             input,
             [buttonSelector]: button,
             [buttonSelector + ' > span']: button_inner_span,
+            [buttonSelector + '.login-highlight > span']: button_inner_span_not_logged,
             [buttonSelector + '.disabled']: button_disabled,
             [buttonSelector + ':active']: button_click,
             '.input-and-button-wrapper': input_and_button_wrapper,
@@ -186,8 +187,9 @@ export default class {
             'padding-right': tablePadding,
         });
 
-        allboomsIcon.add({
-            'font-size': 14,
+        button_inner_span_not_logged.add({
+            'font-family': '"AllBooms Brand Icons" !important',
+            'font-size': 18,
         });
 
         setTimeout(() => input_and_button.add('transition', transitionDuration * 1000 + 'ms'), 100);

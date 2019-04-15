@@ -3,6 +3,6 @@ export const ru = {
     submitText: '↵',
     submittingText: 'Отправка...',
     userNotLogged: 'Для добавления комментария',
-    login: 'Войдите',
+    login: '',
     noCommentText: 'Необходимо ввести текст',
 }
