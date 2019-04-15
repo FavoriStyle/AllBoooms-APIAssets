@@ -4,6 +4,7 @@ import * as Dictionary from './dictionary.js'
 import WidgetStyle from './widget.style.js'
 import AllboomsBrandIcon from '../internal/allbooms-brand-icons/index.js'
 import PerfectScrollbar from './PerfectScrollbar.js'
+import '../internal/roboto.js'
 
 /**
  * @typedef {T extends Promise<infer R> ? R : T} Unpromisify
