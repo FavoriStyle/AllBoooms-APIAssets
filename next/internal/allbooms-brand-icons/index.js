@@ -20,11 +20,6 @@ function pathToIcon({ default: path, width, height }){
     })
 }
 
-const registeredNames = {
-    // icon_name: file name to load path from
-    allbooms: 'allbooms',
-};
-
 /** @type {Map<AllboomsBrandIcon, ShadowRoot>} */
 const roots = new Map;
 const Free = Symbol();
@@ -44,11 +39,9 @@ class AllboomsBrandIcon extends HTMLElement{
         delete this[Free];
         const root = roots.get(this);
         root.innerHTML = '';
-        if(registeredNames[name]){
-            if(!importCache[name]) importCache[name] = import('./' + registeredNames[name] + '.js').then(p => pathToIcon(p));
-            importCache[name].then(elem => root.appendChild(elem));
-            this[Free] = true;
-        }
+        if(!importCache[name]) importCache[name] = import('./' + name + '.js').then(p => pathToIcon(p));
+        root.appendChild(await importCache[name]);
+        this[Free] = true
     }
     attributeChangedCallback(name, oldValue, newValue){
         if(name === 'data-name') this[SetIcon](newValue)
