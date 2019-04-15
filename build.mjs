@@ -44,20 +44,3 @@ function directoryLister(dir){
 }
 
 directoryLister(srcDir);
-
-/*
-readdir()
-
-const options = {};
-
-flist.forEach(fname => {
-    process.stdout.write(`Building ${fname}.js...`);
-    var minified = uglify.minify(fs.readFileSync(fname + '.js', 'utf8'), options);
-    if(!minified.code){
-        console.error('uglify.minify(...).code is not defined properly\n');
-        throw new TypeError(minified.error)
-    }
-    fs.writeFileSync(fname + '.js', minified.code, 'utf8');
-    console.log(`Ok`);
-});
-*/
