@@ -1,41 +1,39 @@
 # APIAssets
 [![](https://img.shields.io/badge/KaMeHb__UA-Telegram-%230088cc.svg?longCache=true&style=flat-square)](https://t.me/KaMeHb_UA)
-[![](https://data.jsdelivr.com/v1/package/gh/FavoriStyle/AllBoooms-APIAssets/badge)](https://www.jsdelivr.com/package/gh/FavoriStyle/AllBoooms-APIAssets)
+[![](https://data.jsdelivr.com/v1/package/gh/FavoriStyle/AllBoooms-APIAssets/badge)](https://www.jsdelivr.com/package/gh/FavoriStyle/AllBoooms-APIAssets?path=dist)
 
 ## Описание
-Репозиторий содержит реализацию работы с [API](https://api.allbooms.com/dev/) сайта [allbooms.com](https://allbooms.com). Код предоставлен в виде модулей для [Require](https://github.com/KaMeHb-UA/require). Не все модули обратно совместимы со стандартом [CommonJS](http://wiki.commonjs.org/wiki/Modules/1.1), поэтому рекомендуется использовать именно [Require](https://github.com/KaMeHb-UA/require).
+**Репозиторий содержит реализацию работы с [API](https://api.allbooms.com/dev/) сайта [allbooms.com](https://allbooms.com). Начиная с версии 3, код предоставлен в виде ES6-модулей**
 
 ## Быстрый старт
 ### Подключение комментариев к своему сайту
-Для начала работы, подключите файл `comments/widget.min.js` этого репозитория к своему коду:
+Для начала работы, подключите файл `dist/comments/widget.js` этого репозитория к своему коду:
 ```javascript
-require('https://cdn.jsdelivr.net/gh/FavoriStyle/AllBoooms-APIAssets@2/comments/widget.min.js').then(CommentsWidget => {
-    var myWidget = new CommentsWidget('ID_приложения', 'ID_виджета');
-    document.body.appendChild(myWidget);
-});
+import CommentsWidget from 'https://cdn.jsdelivr.net/gh/FavoriStyle/AllBoooms-APIAssets@3/dist/comments/widget.js';
+
+const myWidget = new CommentsWidget('ID_приложения', 'ID_виджета');
+document.body.appendChild(myWidget);
 ```
 В коде выше, `ID_приложения` необходимо получить в панели управления разработчика на сайте [allbooms.com](https://allbooms.com). `ID_виджета` — это уникальный текстовый идентификатор для каждого отдельного виджета, который не регулируется со стороны сервера [AllBooms](https://allbooms.com). Другими словами, `ID_виджета` разработчик придумывает сам.
 
 ## Низкоуровневое взаимодействие с API
-**Для работы с API напрямую, подключите `APIref.min.js`:**
+**Для работы с API напрямую, подключите `dist/internal/APIref.js`:**
 ```javascript
-require('https://cdn.jsdelivr.net/gh/FavoriStyle/AllBoooms-APIAssets@2/APIref.min.js').then(APIReference => {
+import APIReference from 'https://cdn.jsdelivr.net/gh/FavoriStyle/AllBoooms-APIAssets@3/dist/internal/APIref.js'
 
-    var API = new APIReference;
+const API = new APIReference;
 
-    // ПРИМЕР
-    // Для получения списка комментариев достаточно выполнить следующее (см. https://allbooms.com:3000/AllBoooms/API_Docs/src/layer1/comments.md):
-    var result = API.comments.external.list({
-        app_id: 'ID_приложения',
-        widget_id: 'ID_виджета'
-    });
-    // result будет содержать Promise, который резолвится в ответ сервера. Если сервер ответил с ненулевым кодом ошибки, то она будет передана клиенту для дальнейшей обработки как любой другой внутренней ошибки JS
-    result.then(data => {
-        console.log('Данные получены:');
-        console.log(data);
-    }).catch(err => {
-        console.log('Данные не получены:');
-        console.error(err);
-    });
-});
+// ПРИМЕР
+// Для получения списка комментариев достаточно выполнить следующее (см. https://allbooms.com:3000/AllBoooms/API_Docs/src/layer1/comments.md):
+(async () => {
+    try{
+        const result = await API.comments.external.list({
+            app_id: 'ID_приложения',
+            widget_id: 'ID_виджета'
+        });
+        console.log('Данные получены:', result);
+    } catch(e){
+        console.error('Данные не получены:', e);
+    }
+})();
 ```
