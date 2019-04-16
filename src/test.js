@@ -1,4 +1,4 @@
-import CommentsWidget from './components/widget.js'
+import CommentsWidget from './comments/widget.js'
 import { Cookies } from './internal/_system.js'
 
 //Cookies.set('allbooms_token', 'my_test_token');

@@ -3,7 +3,7 @@
     "version": "0.1.3-layer1",
     "scripts": {
         "build": "node --experimental-modules build.mjs",
-        "test": "serve next"
+        "test": "serve ."
     },
     "dependencies": {
         "rimraf": "^2.6.3",
