@@ -47,10 +47,13 @@ class CommentsTable{
             },
             childs: [
                 {
-                    name: 'img',
-                    attrs: {
-                        src: avatar,
-                    },
+                    name: 'div',
+                    childs: [{
+                        name: 'img',
+                        attrs: {
+                            src: avatar,
+                        },
+                    }],
                 },
                 {
                     name: 'div',

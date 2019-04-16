@@ -13,6 +13,12 @@ const borderColor = 'darkgrey';
 const transitionDuration = .5; //s
 const avatarWidthHeight = 42;
 const height = 'var(--height)';
+const childCenterBlockPreset = {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+}
 
 export default class {
     constructor(stylesRoot){
@@ -29,6 +35,7 @@ export default class {
         const buttonSelector = 'input + a';
         const tableSelector = '.comments-wrapper';
         const commentSelector = tableSelector + ' > div[commentid]';
+        const avatarSelector = commentSelector + ' > div:first-child';
 
         const {
             '*': _all,
@@ -46,7 +53,8 @@ export default class {
             'input:focus': focused_input,
             'allbooms-icon': allboomsIcon,
             [commentSelector]: comment,
-            [commentSelector + ' > img']: avatar,
+            [avatarSelector]: avatar,
+            [avatarSelector + ' > img']: avatar_img,
             [commentSelector + ' > .name']: name,
             [commentSelector + ' > .time']: time,
             [commentSelector + ' > .comment']: comment_text,
@@ -102,14 +110,10 @@ export default class {
             'border-bottom': `${input_and_button_borderBottomWidth}px solid ${themeColor}`
         });
 
-        button_inner_span.add({
+        button_inner_span.add(Object.assign({
             'font-weight': 'inherit',
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
             'white-space': 'nowrap',
-        });
+        }, childCenterBlockPreset));
 
         button_disabled.add({
             'background-color': borderColor,
@@ -159,9 +163,16 @@ export default class {
 
         avatar.add({
             width: avatarWidthHeight,
+            height: avatarWidthHeight,
             'border-radius': '50%',
             'grid-area': 'avatar',
+            position: 'relative',
+            overflow: 'hidden',
         });
+
+        avatar_img.add(Object.assign({
+            width: avatarWidthHeight,
+        }, childCenterBlockPreset));
 
         name.add({
             'white-space': 'nowrap',
