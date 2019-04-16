@@ -3,7 +3,7 @@
 [![](https://data.jsdelivr.com/v1/package/gh/FavoriStyle/AllBoooms-APIAssets/badge)](https://www.jsdelivr.com/package/gh/FavoriStyle/AllBoooms-APIAssets?path=dist)
 
 ## Описание
-**Репозиторий содержит реализацию работы с [API](https://api.allbooms.com/dev/) сайта [allbooms.com](https://allbooms.com). Начиная с версии 3, код предоставлен в виде ES6-модулей**
+**Репозиторий содержит реализацию работы с [API](https://api.allbooms.com/dev/) сайта [allbooms.com](https://allbooms.com). Начиная с версии 3, код предоставлен в виде [ES6-модулей](https://www.ecma-international.org/ecma-262/6.0/#sec-modules)**
 
 ## Быстрый старт
 ### Подключение комментариев к своему сайту
