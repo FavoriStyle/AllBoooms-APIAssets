@@ -237,7 +237,7 @@ export function currentUser(){
 }
 
 export const currentToken = () => Cookies.get('allbooms_token');
-currentToken.save = token => Cookies.set('allbooms_token', token);
+currentToken.save = token => Cookies.set('allbooms_token', token, { Path: '/' });
 
 export function argsEncode(args){
     var res = [];
