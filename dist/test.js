@@ -1,1 +1,1 @@
-import CommentsWidget from"./components/widget.js";import{Cookies}from"./internal/_system.js";console.log({Cookies:Cookies}),document.body.appendChild(new CommentsWidget("lSgmGGAVrVta3X9xeO3D","1"));
+import CommentsWidget from"./comments/widget.js";import{Cookies}from"./internal/_system.js";console.log({Cookies:Cookies}),document.body.appendChild(new CommentsWidget("lSgmGGAVrVta3X9xeO3D","1"));
