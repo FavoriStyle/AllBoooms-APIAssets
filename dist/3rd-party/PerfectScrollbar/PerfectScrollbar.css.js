@@ -1,0 +1,1 @@
+function dir(t){var r=t.split("/");return r.pop(),r.join("/")}export default fetch(dir(import.meta.url)+"/PerfectScrollbar.css").then(t=>t.text());

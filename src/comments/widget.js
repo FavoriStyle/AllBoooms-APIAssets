@@ -2,7 +2,7 @@ import APIReference from '../internal/APIref.js'
 import { createElement, htmlSafeText, normalizeDate, currentUser, Link, currentToken, argsEncode, argsDecode, Awaiter, wait } from '../internal/_system.js'
 import * as Dictionary from './dictionary.js'
 import WidgetStyle from './widget.style.js'
-import PerfectScrollbar from './PerfectScrollbar.js'
+import PerfectScrollbar from '../3rd-party/PerfectScrollbar/index.js'
 import '../internal/roboto.js'
 import '../internal/allbooms-brand-icons.js'
 
@@ -182,17 +182,15 @@ class AllBoomsCommentsWidget extends HTMLElement{
         const buttonInnerSpan = button.children[0];
         this.table = new CommentsTable(commentsWrapper);
         // scrollbar processing
-        (async () => {
-            const scrollbar = await new PerfectScrollbar(commentsWrapper, { root: shadow });
-            var needNextCycle = true;
-            commentsWrapper.addEventListener('ps-scroll-y', async () => {
-                if(needNextCycle && commentsWrapper.getBoundingClientRect().bottom - commentsWrapper.children[commentsWrapper.children.length - 11].getBoundingClientRect().y >= 0 && !this._requestBusy){
-                    this._requestBusy = true;
-                    if(!await this.requestComments()) needNextCycle = false;
-                    this._requestBusy = false
-                }
-            })
-        })();
+        const scrollbar = new PerfectScrollbar(commentsWrapper, { root: shadow });
+        var needNextCycle = true;
+        commentsWrapper.addEventListener('ps-scroll-y', async () => {
+            if(needNextCycle && commentsWrapper.getBoundingClientRect().bottom - commentsWrapper.children[commentsWrapper.children.length - 11].getBoundingClientRect().y >= 0 && !this._requestBusy){
+                this._requestBusy = true;
+                if(!await this.requestComments()) needNextCycle = false;
+                this._requestBusy = false
+            }
+        });
         // user processing
         (async () => {
             await locationProcess;

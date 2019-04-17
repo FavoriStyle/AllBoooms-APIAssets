@@ -12,7 +12,6 @@ declare namespace PerfectScrollbar {
         useBothWheelAxes?: boolean
         wheelPropagation?: boolean
         wheelSpeed?: number
-        root?: HTMLElement
     }
     export type XY = 'start' | 'end' | null
 }
@@ -27,8 +26,8 @@ interface PerfectScrollbar {
 }
 
 declare const PerfectScrollbar: {
-    new(element: string | HTMLElement, options?: PerfectScrollbar.Options): Promise<PerfectScrollbar>
-    prototype: Object
+    new(element: string | HTMLElement, options?: PerfectScrollbar.Options & { root?: HTMLElement }): PerfectScrollbar
+    prototype: PerfectScrollbar
 }
 
 export default PerfectScrollbar
