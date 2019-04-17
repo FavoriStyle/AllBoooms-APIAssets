@@ -23,6 +23,17 @@ function mkdir(dir){
 rimraf.sync(distDir);
 mkdir(distDir);
 
+function processFile(fname, processor){
+    const filePath = path.relative(srcDir, fname);
+    process.stdout.write(`Processing ${filePath}... `);
+    const src = readFile(fname, 'utf8');
+    const minified = processor ? processor(src) : src;
+    const destination = path.resolve(distDir, filePath);
+    mkdir(path.resolve(destination, '..'));
+    writeFile(destination, minified, 'utf8');
+    console.log('Ok')
+}
+
 function directoryLister(dir){
     readdir(dir, {
         encoding: 'utf8',
@@ -30,15 +41,14 @@ function directoryLister(dir){
     }).forEach(dirent => {
         const direntPath = path.resolve(dir, dirent.name);
         if(dirent.isDirectory()) directoryLister(direntPath);
-        else if(dirent.isFile() && path.extname(direntPath) === '.js'){
-            const filePath = path.relative(srcDir, direntPath);
-            process.stdout.write(`Minifying ${filePath}... `);
-            const minified = uglify.minify(readFile(direntPath, 'utf8'));
-            if(!minified.code) throw new Error(minified.error);
-            const destination = path.resolve(distDir, filePath);
-            mkdir(path.resolve(destination, '..'));
-            writeFile(destination, minified.code, 'utf8');
-            console.log('Ok')
+        else if(dirent.isFile()){
+            if(path.extname(direntPath) === '.js'){
+                processFile(direntPath, src => {
+                    const minified = uglify.minify(src);
+                    if(!minified.code) throw new Error(minified.error);
+                    return minified.code
+                })
+            } else if(path.extname(direntPath) === '.css') processFile(direntPath);
         }
     })
 }
