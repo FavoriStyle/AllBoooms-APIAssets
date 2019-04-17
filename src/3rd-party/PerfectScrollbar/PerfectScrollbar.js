@@ -724,27 +724,6 @@ var keyboard = function(i) {
 var wheel = function(i) {
     var element = i.element;
 
-    function shouldPreventDefault(deltaX, deltaY) {
-        var roundedScrollTop = Math.floor(element.scrollTop);
-        var isTop = element.scrollTop === 0;
-        var isBottom =
-            roundedScrollTop + element.offsetHeight === element.scrollHeight;
-        var isLeft = element.scrollLeft === 0;
-        var isRight =
-            element.scrollLeft + element.offsetWidth === element.scrollWidth;
-
-        var hitsBound;
-
-        // pick axis with primary direction
-        if (Math.abs(deltaY) > Math.abs(deltaX)) {
-            hitsBound = isTop || isBottom;
-        } else {
-            hitsBound = isLeft || isRight;
-        }
-
-        return hitsBound ? !i.settings.wheelPropagation : true;
-    }
-
     function getDeltaFromEvent(e) {
         var deltaX = e.deltaX;
         var deltaY = -1 * e.deltaY;
@@ -833,7 +812,6 @@ var wheel = function(i) {
             return;
         }
 
-        var shouldPrevent = false;
         if (!i.settings.useBothWheelAxes) {
             // deltaX will only be used for horizontal scrolling and deltaY will
             // only be used for vertical scrolling - this is the default
@@ -847,7 +825,6 @@ var wheel = function(i) {
             } else {
                 element.scrollTop += deltaX * i.settings.wheelSpeed;
             }
-            shouldPrevent = true;
         } else if (i.scrollbarXActive && !i.scrollbarYActive) {
             // useBothWheelAxes and only horizontal bar is active, so use both
             // wheel axes for horizontal bar
@@ -856,13 +833,11 @@ var wheel = function(i) {
             } else {
                 element.scrollLeft -= deltaY * i.settings.wheelSpeed;
             }
-            shouldPrevent = true;
         }
 
         updateGeometry(i);
 
-        shouldPrevent = shouldPrevent || shouldPreventDefault(deltaX, deltaY);
-        if (shouldPrevent && !e.ctrlKey) {
+        if (!e.ctrlKey) {
             e.stopPropagation();
             e.preventDefault();
         }
