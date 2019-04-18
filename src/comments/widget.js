@@ -129,7 +129,7 @@ class AllBoomsCommentsWidget extends HTMLElement{
         this.widgetID = decodeURIComponent(this.getAttribute('data-widgetid'));
         const createUserStorage = (function(){
             this[userStorage] = Object.assign([], {
-                awaiters: {},
+                awaiters: this[userStorage] ? this[userStorage].awaiters : {},
                 clear: createUserStorage,
             })
         }).bind(this);
@@ -257,7 +257,7 @@ class AllBoomsCommentsWidget extends HTMLElement{
         return comments.length;
     }
     /** @param {string} uid */
-    userInfo(uid){
+    async userInfo(uid){
         /** @type {string[] & { awaiters: Object<string, Awaiter<Unpromisify<ReturnType<typeof API.user.getInfo>>['']>>, clear(): void }} */
         const storage = this[userStorage];
         storage.latest = uid;
@@ -281,7 +281,7 @@ class AllBoomsCommentsWidget extends HTMLElement{
                 }
             })
         }
-        return storage.awaiters[uid]
+        return await storage.awaiters[uid]
     }
     async onNewComment(mode, { id, userid, text, timestamp }){
         const { fullName: name, avatar } = await this.userInfo(userid);
