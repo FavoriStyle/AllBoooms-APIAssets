@@ -9,7 +9,7 @@
 ### Подключение комментариев к своему сайту
 Для начала работы, подключите файл `dist/comments/widget.js` этого репозитория к своему коду:
 ```javascript
-import CommentsWidget from 'https://cdn.jsdelivr.net/gh/FavoriStyle/AllBoooms-APIAssets@3/dist/comments/widget.js';
+import CommentsWidget from 'https://cdn.jsdelivr.net/gh/FavoriStyle/AllBoooms-APIAssets/dist/comments/widget.js';
 
 const myWidget = new CommentsWidget('ID_приложения', 'ID_виджета');
 document.body.appendChild(myWidget);
@@ -19,7 +19,7 @@ document.body.appendChild(myWidget);
 ## Низкоуровневое взаимодействие с API
 **Для работы с API напрямую, подключите `dist/internal/APIref.js`:**
 ```javascript
-import APIReference from 'https://cdn.jsdelivr.net/gh/FavoriStyle/AllBoooms-APIAssets@3/dist/internal/APIref.js'
+import APIReference from 'https://cdn.jsdelivr.net/gh/FavoriStyle/AllBoooms-APIAssets/dist/internal/APIref.js'
 
 const API = new APIReference;
 
