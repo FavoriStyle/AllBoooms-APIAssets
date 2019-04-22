@@ -303,6 +303,10 @@ negotiator@0.6.1:
   version "0.6.1"
   resolved "https://registry.yarnpkg.com/negotiator/-/negotiator-0.6.1.tgz#2b327184e8992101177b28563fb5e7102acd0ca9"
 
+"node-experimental-modules-launcher@git+https://github.com/KaMeHb-UA/nodem.git#3018ab68dd20c7a09305acdb7879be9f4f1b9ab9":
+  version "0.0.1"
+  resolved "git+https://github.com/KaMeHb-UA/nodem.git#3018ab68dd20c7a09305acdb7879be9f4f1b9ab9"
+
 npm-run-path@^2.0.0:
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/npm-run-path/-/npm-run-path-2.0.2.tgz#35a9232dfa35d7067b4cb2ddf2357b1871536c5f"
