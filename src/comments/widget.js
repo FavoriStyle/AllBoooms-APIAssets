@@ -64,6 +64,7 @@ class CommentsTable{
                         name: 'a',
                         attrs: {
                             href: APIReference.host + '/' + uid,
+                            target: '_blank',
                         },
                         html: htmlSafeText(name),
                     }],
