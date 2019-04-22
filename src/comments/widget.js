@@ -63,7 +63,7 @@ class CommentsTable{
                     childs: [{
                         name: 'a',
                         attrs: {
-                            href: APIReference.baseHost + '/' + uid,
+                            href: APIReference.host + '/' + uid,
                         },
                         html: htmlSafeText(name),
                     }],
@@ -224,7 +224,7 @@ class AllBoomsCommentsWidget extends HTMLElement{
                     const loc = new Link(location.href);
                     loc.params.save_allbooms_token = '';
                     e.preventDefault();
-                    location.href = `https://${APIReference.baseHost}/getToken?callback=${encodeURIComponent(loc.href)}&appid=${encodeURIComponent(this.appID)}`
+                    location.href = `${APIReference.host}/getToken?callback=${encodeURIComponent(loc.href)}&appid=${encodeURIComponent(this.appID)}`
                 })
             }
             shadow.append(inputAndButtonWrapper, commentsWrapper)

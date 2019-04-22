@@ -3,7 +3,7 @@ class Method{
         return new Proxy(data => {
             return new Promise((resolve, reject) => {
                 var xhr = new XMLHttpRequest;
-                xhr.open('POST', `https://api.${APIReference.baseHost}/${iface}.${method}`, true);
+                xhr.open('POST', `${APIReference.href}/${iface}.${method}`, true);
                 xhr.setRequestHeader('Content-type', 'application/json');
                 xhr.onreadystatechange = () => {
                     if (xhr.readyState != 4) return;
@@ -22,7 +22,8 @@ class Method{
         })
     }
 }
-
+let baseHost = 'allbooms.com';
+let baseProtocol = 'https';
 class APIReference{
     constructor(){
         return new Proxy({}, {
@@ -37,7 +38,18 @@ class APIReference{
             }
         })
     }
+    static get href(){
+        return `${baseProtocol}://api.${baseHost}`
+    }
+    static get host(){
+        return `${baseProtocol}://${baseHost}`
+    }
+    static setHost(hostname){
+        baseHost = hostname
+    }
+    static setProtocol(protocol){
+        baseProtocol = protocol
+    }
 }
-APIReference.baseHost = 'allbooms.com';
 
 export default APIReference

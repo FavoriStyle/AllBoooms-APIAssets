@@ -128,5 +128,8 @@ export default class APIReference{
             token: string
         }): Promise<UserProfile | UserProviderProfile>
     }
-    static baseHost: string;
+    static href: string
+    static host: string
+    static setHost(hostname: string): void
+    static setProtocol(protocol: string): void
 }
