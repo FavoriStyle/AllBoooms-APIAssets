@@ -24,6 +24,7 @@ class Method{
 }
 let baseHost = 'allbooms.com';
 let baseProtocol = 'https';
+
 class APIReference{
     constructor(){
         return new Proxy({}, {
@@ -38,18 +39,8 @@ class APIReference{
             }
         })
     }
-    static get href(){
-        return `${baseProtocol}://api.${baseHost}`
-    }
-    static get host(){
-        return `${baseProtocol}://${baseHost}`
-    }
-    static setHost(hostname){
-        baseHost = hostname
-    }
-    static setProtocol(protocol){
-        baseProtocol = protocol
-    }
 }
+APIReference.href = `${baseProtocol}://api.${baseHost}`;
+APIReference.host = `${baseProtocol}://${baseHost}`;
 
 export default APIReference
