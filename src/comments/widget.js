@@ -1,10 +1,11 @@
+import '../internal/roboto.js'
+import '../internal/allbooms-brand-icons.js'
 import APIReference from '../internal/APIref.js'
 import { createElement, htmlSafeText, normalizeDate, currentUser, Link, currentToken, argsEncode, argsDecode, Awaiter, wait } from '../internal/_system.js'
 import * as Dictionary from './dictionary.js'
 import WidgetStyle from './widget.style.js'
 import PerfectScrollbar from '../3rd-party/PerfectScrollbar/index.js'
-import '../internal/roboto.js'
-import '../internal/allbooms-brand-icons.js'
+import textareaNOL from '../3rd-party/textareaNOL/index.js'
 
 /**
  * @typedef {T extends Promise<infer R> ? R : T} Unpromisify
@@ -143,11 +144,11 @@ class AllBoomsCommentsWidget extends HTMLElement{
         const dictionary = Dictionary[options.lang];
         const shadow = this.attachShadow({mode: 'closed'});
         this.styles = new WidgetStyle(shadow);
-        //const inputWidth = this.styles.input.get('width');
-        //const buttonWidth = this.styles.button.get('width');
-        // inputWidth instanceof CSSCalcRule === true
-        //inputWidth.secondArg = '64px';
-        //buttonWidth.set(inputWidth.secondArg);
+        const inputHeight = this.styles['*'].get('--input-height');
+        const inputStyles = this.styles['textarea'];
+        const inputLineHeight = inputStyles.get('line-height');
+        const initial_input_height = inputHeight.get();
+
         const inputAndButtonWrapper = createElement({
             name: 'div',
             attrs: {
@@ -155,7 +156,7 @@ class AllBoomsCommentsWidget extends HTMLElement{
             },
             childs: [
                 {
-                    name: 'input',
+                    name: 'textarea',
                     attrs: {
                         placeholder: dictionary.placeholder,
                     },
@@ -183,8 +184,8 @@ class AllBoomsCommentsWidget extends HTMLElement{
         const buttonInnerSpan = button.children[0];
         this.table = new CommentsTable(commentsWrapper);
         // scrollbar processing
-        const scrollbar = new PerfectScrollbar(commentsWrapper, { root: shadow });
-        var needNextCycle = true;
+        new PerfectScrollbar(commentsWrapper, { root: shadow });
+        let needNextCycle = true;
         commentsWrapper.addEventListener('ps-scroll-y', async () => {
             if(needNextCycle && commentsWrapper.getBoundingClientRect().bottom - commentsWrapper.children[commentsWrapper.children.length - 11].getBoundingClientRect().y >= 0 && !this._requestBusy){
                 this._requestBusy = true;
@@ -192,6 +193,24 @@ class AllBoomsCommentsWidget extends HTMLElement{
                 this._requestBusy = false
             }
         });
+        const inputFixHeight = (() => {
+            let lastLineCount = 4;
+            return () => {
+                input.style.transition = 'unset';
+                button.style.transition = 'unset';
+                const lineH = inputLineHeight.get();
+                const lines = textareaNOL(input, lineH) || 1;
+                if(lines > lastLineCount){
+                    inputHeight.set(inputHeight.get() + lineH * (lines - lastLineCount))
+                } else if(lines < lastLineCount){
+                    inputHeight.set(inputHeight.get() - lineH * (lastLineCount - lines))
+                }
+                lastLineCount = lines;
+                input.style.transition = '';
+                button.style.transition = '';
+            }
+        })();
+        setInterval(inputFixHeight, 200);
         // user processing
         (async () => {
             await locationProcess;
@@ -210,6 +229,7 @@ class AllBoomsCommentsWidget extends HTMLElement{
                         }).then(({ id, timestamp }) => {
                             input.value = '';
                             input.disabled = false;
+                            inputHeight.set(initial_input_height);
                             button.classList.remove('disabled');
                         })
                     } else {
