@@ -196,8 +196,6 @@ class AllBoomsCommentsWidget extends HTMLElement{
         const inputFixHeight = (() => {
             let lastLineCount = 4;
             return () => {
-                input.style.transition = 'unset';
-                button.style.transition = 'unset';
                 const lineH = inputLineHeight.get();
                 const lines = textareaNOL(input, lineH) || 1;
                 if(lines > lastLineCount){
@@ -206,8 +204,6 @@ class AllBoomsCommentsWidget extends HTMLElement{
                     inputHeight.set(inputHeight.get() - lineH * (lastLineCount - lines))
                 }
                 lastLineCount = lines;
-                input.style.transition = '';
-                button.style.transition = '';
             }
         })();
         setInterval(inputFixHeight, 200);
