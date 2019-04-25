@@ -147,7 +147,6 @@ class AllBoomsCommentsWidget extends HTMLElement{
         const inputHeight = this.styles['*'].get('--input-height');
         const inputStyles = this.styles['textarea'];
         const inputLineHeight = inputStyles.get('line-height');
-        const initial_input_height = inputHeight.get();
 
         const inputAndButtonWrapper = createElement({
             name: 'div',
@@ -193,9 +192,20 @@ class AllBoomsCommentsWidget extends HTMLElement{
                 this._requestBusy = false
             }
         });
+        function fixStyleHeight(){
+            if(input.style.height) setTimeout(() => {
+                if(input.style.height){
+                    input.style.height = '';
+                    const lastVal = input.value;
+                    input.value = ' ';
+                    setTimeout(() => input.value = lastVal)
+                }
+            })
+        }
         const inputFixHeight = (() => {
             let lastLineCount = 4;
             return () => {
+                fixStyleHeight();
                 const lineH = inputLineHeight.get();
                 const lines = textareaNOL(input, lineH) || 1;
                 if(lines > lastLineCount){
@@ -207,12 +217,37 @@ class AllBoomsCommentsWidget extends HTMLElement{
             }
         })();
         setInterval(inputFixHeight, 200);
+        const inputKeyListeners = (() => {
+            let pressed = false;
+            function up(){
+                pressed = false;
+                button.classList.remove('active');
+                button.click()
+            }
+            function down(){
+                pressed = true;
+                button.classList.add('active')
+            }
+            return {
+                up: e => (e.preventDefault(), e.which) === 13 && pressed ? up() : null,
+                down: e => e.which === 13 ? !e.shiftKey ? (e.preventDefault(), !pressed ? down() : null) : pressed ? e.preventDefault() : null : null
+            }
+        })();
+        // fix input height if it's not normal
+        setTimeout(() => {
+            input.style.height = '';
+            input.value = ' ';
+            setTimeout(() => input.value = '', 500)
+        }, 2000);
+
         // user processing
         (async () => {
             await locationProcess;
             const user = await currentUser();
             if(user){
                 input.setAttribute('placeholder', dictionary.placeholder);
+                input.addEventListener('keydown', inputKeyListeners.down);
+                input.addEventListener('keyup', inputKeyListeners.up);
                 buttonInnerSpan.innerText = dictionary.submitText;
                 button.addEventListener('click', () => {
                     if(input.value){
@@ -225,7 +260,6 @@ class AllBoomsCommentsWidget extends HTMLElement{
                         }).then(({ id, timestamp }) => {
                             input.value = '';
                             input.disabled = false;
-                            inputHeight.set(initial_input_height);
                             button.classList.remove('disabled');
                         })
                     } else {

@@ -54,10 +54,11 @@ export default class {
             [buttonSelector + ' > span']: button_inner_span,
             [buttonSelector + '.login-highlight > span']: button_inner_span_not_logged,
             [buttonSelector + '.disabled']: button_disabled,
-            [buttonSelector + ':active']: button_click,
+            [`${buttonSelector}:active, ${buttonSelector}.active`]: button_click,
             '.input-and-button-wrapper': input_and_button_wrapper,
             [buttonSelector + ', textarea']: input_and_button,
             'textarea:focus': focused_input,
+            [`${buttonSelector}.active`]: focused_input_with_button_click,
             [commentSelector]: comment,
             [avatarSelector]: avatar,
             [avatarSelector + ' > img']: avatar_img,
@@ -143,6 +144,10 @@ export default class {
             color: themeColor,
         });
 
+        focused_input_with_button_click.add({
+            'border-bottom-color': `${themeColor} !important`,
+        });
+
         table.add({
             'background-color': '#fff',
             padding: tablePadding,
@@ -183,7 +188,7 @@ export default class {
         comment.add({
             width: '100%',
             display: 'grid',
-            'grid-template-columns': `${avatarWidthHeight}px auto auto`,
+            'grid-template-columns': `${avatarWidthHeight}px auto minmax(0, min-content)`,
             'grid-template-areas': "'avatar name time' 'avatar comment comment'",
             'margin-bottom': tablePadding,
         });
@@ -207,7 +212,6 @@ export default class {
             'text-overflow': 'ellipsis',
             'grid-area': 'name',
             color: themeColor,
-            'line-height': '0.8em',
             'padding-left': tablePadding,
             'padding-right': tablePadding,
         });
@@ -215,14 +219,16 @@ export default class {
         time.add({
             'grid-area': 'time',
             'text-align': 'right',
-            'line-height': '0.8em',
             'padding-right': tablePadding,
+            'white-space': 'nowrap',
         });
 
         comment_text.add({
             'grid-area': 'comment',
             'padding-left': tablePadding,
             'padding-right': tablePadding,
+            overflow: 'auto',
+            'overflow-wrap': 'break-word',
         });
 
         button_inner_span_not_logged.add({
