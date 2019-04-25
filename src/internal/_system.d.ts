@@ -17,7 +17,7 @@ type DateNormalizatorDictionaryWords =
     | 'dec'
     | 'hours'
     | 'mins'
-    | 'secs'
+    | 'newly'
 
 type DateNormalizatorDictionary = { [T in DateNormalizatorDictionaryWords]?: string }
 

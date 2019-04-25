@@ -28,7 +28,7 @@ export const normalizeDate = (() => {
         // time
         hours: 'час',
         mins: 'мин',
-        secs: 'сек',
+        newly: 'только что',
     };
     function dayStart(date){
         return date - date % day
@@ -37,7 +37,6 @@ export const normalizeDate = (() => {
         return `${diff / divider | 0} ${suffix} ${dictionary.before}`
     }
     function timeBefore(diff, dictionary){
-        if(diff % min === diff) return before(diff, sec, dictionary.secs, dictionary);
         if(diff % hour === diff) return before(diff, min, dictionary.mins, dictionary);
         return before(diff, hour, dictionary.hours, dictionary)
     }
@@ -65,6 +64,7 @@ export const normalizeDate = (() => {
         const yesterday = today - day;
         const diff = now - date;
         dictionary = Object.assign({}, defaultDict, dictionary);
+        if(diff < min) return dictionary.newly;
         if(diff < day) return timeBefore(diff, dictionary);
         else if(today > date && yesterday < date) return dictionary.yesterday;
         else return formatDate(now, date, dictionary)
