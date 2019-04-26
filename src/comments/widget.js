@@ -5,7 +5,6 @@ import { createElement, htmlSafeText, normalizeDate, currentUser, Link, currentT
 import * as Dictionary from './dictionary.js'
 import WidgetStyle from './widget.style.js'
 import PerfectScrollbar from '../3rd-party/PerfectScrollbar/index.js'
-import textareaNOL from '../3rd-party/textareaNOL/index.js'
 
 /**
  * @typedef {T extends Promise<infer R> ? R : T} Unpromisify
@@ -86,7 +85,7 @@ class CommentsTable{
                 },
             ],
         });
-        setInterval(this._dateUpdate.bind(null, elem.children[2], time), 1000);
+        setInterval(this._dateUpdate.bind(null, elem.children[2], time), 10000);
         return elem
     }
     _commentAlreadyThere(id){
@@ -144,9 +143,6 @@ class AllBoomsCommentsWidget extends HTMLElement{
         const dictionary = Dictionary[options.lang];
         const shadow = this.attachShadow({mode: 'closed'});
         this.styles = new WidgetStyle(shadow);
-        const inputHeight = this.styles['*'].get('--input-height');
-        const inputStyles = this.styles['textarea'];
-        const inputLineHeight = inputStyles.get('line-height');
 
         const inputAndButtonWrapper = createElement({
             name: 'div',
@@ -155,10 +151,13 @@ class AllBoomsCommentsWidget extends HTMLElement{
             },
             childs: [
                 {
-                    name: 'textarea',
+                    name: 'div',
                     attrs: {
-                        placeholder: dictionary.placeholder,
+                        contentEditable: '',
                     },
+                },
+                {
+                    name: 'div',
                 },
                 {
                     name: 'a',
@@ -179,9 +178,26 @@ class AllBoomsCommentsWidget extends HTMLElement{
             },
         });
         const input = inputAndButtonWrapper.children[0];
-        const button = inputAndButtonWrapper.children[1];
+        const placeholder = inputAndButtonWrapper.children[1];
+        const button = inputAndButtonWrapper.children[2];
         const buttonInnerSpan = button.children[0];
         this.table = new CommentsTable(commentsWrapper);
+
+        function stripNonRelevantText(str){
+            return str.replace(/^\s+/g, '').replace(/\s+$/g, '')
+        }
+
+        function getInputContent(){
+            return stripNonRelevantText(input.innerText)
+        }
+
+        function setInputContent(val){
+            input.innerText = val
+        }
+
+        // paceholder controller
+        setInterval(() => getInputContent() ? placeholder.style.display ? null : placeholder.style.display = 'none' : placeholder.style.display ? placeholder.style.display = '' : null)
+
         // scrollbar processing
         new PerfectScrollbar(commentsWrapper, { root: shadow });
         let needNextCycle = true;
@@ -192,31 +208,6 @@ class AllBoomsCommentsWidget extends HTMLElement{
                 this._requestBusy = false
             }
         });
-        function fixStyleHeight(){
-            if(input.style.height) setTimeout(() => {
-                if(input.style.height){
-                    input.style.height = '';
-                    const lastVal = input.value;
-                    input.value = ' ';
-                    setTimeout(() => input.value = lastVal)
-                }
-            })
-        }
-        const inputFixHeight = (() => {
-            let lastLineCount = 4;
-            return () => {
-                fixStyleHeight();
-                const lineH = inputLineHeight.get();
-                const lines = textareaNOL(input, lineH) || 1;
-                if(lines > lastLineCount){
-                    inputHeight.set(inputHeight.get() + lineH * (lines - lastLineCount))
-                } else if(lines < lastLineCount){
-                    inputHeight.set(inputHeight.get() - lineH * (lastLineCount - lines))
-                }
-                lastLineCount = lines;
-            }
-        })();
-        setInterval(inputFixHeight, 200);
         const inputKeyListeners = (() => {
             let pressed = false;
             function up(){
@@ -233,32 +224,27 @@ class AllBoomsCommentsWidget extends HTMLElement{
                 down: e => e.which === 13 ? !e.shiftKey ? (e.preventDefault(), !pressed ? down() : null) : pressed ? e.preventDefault() : null : null
             }
         })();
-        // fix input height if it's not normal
-        setTimeout(() => {
-            input.style.height = '';
-            input.value = ' ';
-            setTimeout(() => input.value = '', 500)
-        }, 2000);
 
         // user processing
         (async () => {
             await locationProcess;
             const user = await currentUser();
             if(user){
-                input.setAttribute('placeholder', dictionary.placeholder);
+                placeholder.innerText = dictionary.placeholder;
                 input.addEventListener('keydown', inputKeyListeners.down);
                 input.addEventListener('keyup', inputKeyListeners.up);
                 buttonInnerSpan.innerText = dictionary.submitText;
                 button.addEventListener('click', () => {
-                    if(input.value){
+                    const inputContent = getInputContent();
+                    if(inputContent){
                         input.disabled = true;
                         button.classList.add('disabled');
                         API.comments.external.add({
                             token: currentToken(),
                             widget_id: this.widgetID,
-                            text: input.value,
+                            text: inputContent,
                         }).then(({ id, timestamp }) => {
-                            input.value = '';
+                            setInputContent('');
                             input.disabled = false;
                             button.classList.remove('disabled');
                         })
@@ -267,7 +253,7 @@ class AllBoomsCommentsWidget extends HTMLElement{
                     }
                 })
             } else {
-                input.setAttribute('placeholder', dictionary.userNotLogged);
+                placeholder.innerText = dictionary.userNotLogged;
                 input.disabled = true;
                 button.classList.add('login-highlight');
                 buttonInnerSpan.innerText = dictionary.login;
@@ -278,7 +264,14 @@ class AllBoomsCommentsWidget extends HTMLElement{
                     location.href = `${APIReference.host}/getToken?callback=${encodeURIComponent(loc.href)}&appid=${encodeURIComponent(this.appID)}`
                 })
             }
-            shadow.append(inputAndButtonWrapper, commentsWrapper)
+            const box = createElement({
+                name: 'div',
+                attrs: {
+                    class: 'box',
+                },
+            });
+            box.append(inputAndButtonWrapper, commentsWrapper);
+            shadow.append(box)
         })();
         // comments request
         (async () => {

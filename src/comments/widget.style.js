@@ -19,6 +19,7 @@ const childCenterBlockPreset = {
     transform: 'translate(-50%, -50%)',
 };
 const inputHeight = 'var(--input-height)';
+const inputPadding = Object.assign(12, { left: 20 });
 
 function generageSquareProp(name, initialVal, ...excluded){
     const res = {};
@@ -39,7 +40,9 @@ export default class {
             })
         })();
 
-        const buttonSelector = 'textarea + a';
+        const inputSelector = 'div[contentEditable]';
+        const placeholderSelector = inputSelector + ' + div';
+        const buttonSelector = placeholderSelector + ' + a';
         const tableSelector = '.comments-wrapper';
         const commentSelector = tableSelector + ' > div[commentid]';
         const avatarSelector = commentSelector + ' > div:first-child';
@@ -49,15 +52,15 @@ export default class {
             [tableSelector]: table,
             a: link,
             'a:active': link_active,
-            'textarea': input,
+            [inputSelector]: input,
             [buttonSelector]: button,
             [buttonSelector + ' > span']: button_inner_span,
             [buttonSelector + '.login-highlight > span']: button_inner_span_not_logged,
             [buttonSelector + '.disabled']: button_disabled,
             [`${buttonSelector}:active, ${buttonSelector}.active`]: button_click,
             '.input-and-button-wrapper': input_and_button_wrapper,
-            [buttonSelector + ', textarea']: input_and_button,
-            'textarea:focus': focused_input,
+            [buttonSelector + ', ' + inputSelector]: input_and_button,
+            [inputSelector + ':focus']: focused_input,
             [`${buttonSelector}.active`]: focused_input_with_button_click,
             [commentSelector]: comment,
             [avatarSelector]: avatar,
@@ -65,6 +68,8 @@ export default class {
             [commentSelector + ' > .name']: name,
             [commentSelector + ' > .time']: time,
             [commentSelector + ' > .comment']: comment_text,
+            [placeholderSelector]: placeholder,
+            '.box': box,
         } = ruleSetsPrecached;
 
         _all.add({
@@ -82,29 +87,34 @@ export default class {
         };
 
         input_and_button_wrapper.add({
-            height: inputWithBorderHeight,
-            position: 'relative',
             width: width,
+            position: 'relative',
         });
 
-        input.add(Object.assign(generageSquareProp('padding', 12, 'left', 20), {
-            height: inputWithBorderHeight,
+        input.add(Object.assign(generageSquareProp('padding', inputPadding * 1, 'left', inputPadding.left), {
+            'min-height': {
+                ruleType: 'calc',
+                firstArg: inputHeight,
+                operator: '-',
+                secondArg: (inputPadding * 2) + 'px'
+            },
             width: {
                 ruleType: 'calc',
                 firstArg: width,
                 operator: '-',
-                secondArg: buttonWidth + 'px'
+                secondArg: (buttonWidth + inputPadding.left + inputPadding) + 'px'
             },
+            display: 'inline-block',
             'background-color': '#fff',
             color: 'black',
             'border-top-left-radius': borderRadius,
-            position: 'absolute',
             'border-bottom': `${input_and_button_borderBottomWidth}px solid ${borderColor} !important`,
             border: 0,
             resize: 'none',
             margin: 0,
             'line-height': 12,
-            overflow: 'hidden',
+            overflow: 'auto',
+            'overflow-wrap': 'break-word',
         }));
 
         focused_input.add({
@@ -116,7 +126,12 @@ export default class {
             width: buttonWidth,
             padding: 0,
             'border-top-right-radius': borderRadius,
-            height: inputHeight,
+            height: {
+                ruleType: 'calc',
+                firstArg: '100%',
+                operator: '-',
+                secondArg: input_and_button_borderBottomWidth + 'px',
+            },
             'background-color': themeColor,
             color: '#fff',
             'font-weight': '700',
@@ -125,7 +140,8 @@ export default class {
             position: 'relative',
             float: 'right',
             'text-align': 'center',
-            'border-bottom': `${input_and_button_borderBottomWidth}px solid ${themeColor}`
+            'border-bottom': `${input_and_button_borderBottomWidth}px solid ${themeColor}`,
+            position: 'absolute',
         });
 
         button_inner_span.add(Object.assign({
@@ -239,6 +255,22 @@ export default class {
         input_and_button.add({
             'transition-property': 'border-color, background-color',
             'transition-duration': `${transitionDuration}s`,
+        });
+
+        placeholder.add({
+            position: 'absolute',
+            'z-index': '1',
+            top: inputPadding * 1,
+            left: inputPadding.left,
+            'pointer-events': 'none',
+            color: 'dimgray',
+        });
+
+        box.add({
+            height,
+            display: 'flex',
+            'flex-flow': 'column',
+            overflow: 'hidden',
         });
 
         return ruleSetsPrecached
