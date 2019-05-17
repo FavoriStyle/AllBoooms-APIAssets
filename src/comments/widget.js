@@ -1,7 +1,8 @@
 import '../internal/roboto.js'
 import '../internal/allbooms-brand-icons.js'
 import APIReference from '../internal/APIref.js'
-import { createElement, htmlSafeText, normalizeDate, currentUser, Link, currentToken, argsEncode, argsDecode, Awaiter, wait } from '../internal/_system.js'
+import { createElement, htmlSafeText, normalizeDate, currentUser, Link, currentToken, argsEncode, argsDecode, wait } from '../internal/_system.js'
+import { Awaiter, Interval } from 'https://cdn.jsdelivr.net/gh/FavoriStyle/async-helpers/dist/main.mjs'
 import * as Dictionary from './dictionary.js'
 import WidgetStyle from './widget.style.js'
 import PerfectScrollbar from '../3rd-party/PerfectScrollbar/index.js'
@@ -107,14 +108,6 @@ class CommentsTable{
 }
 
 const userStorage = Symbol();
-
-function setIntervalForAsync(f, t){
-    function f2(){
-        f().then(nextCycle)
-    }
-    var nextCycle = setTimeout.bind(null, f2, t);
-    f2()
-}
 
 function _getCommentId(elem){
     if(elem){
@@ -237,7 +230,7 @@ class AllBoomsCommentsWidget extends HTMLElement{
                 button.addEventListener('click', () => {
                     const inputContent = getInputContent();
                     if(inputContent){
-                        input.disabled = true;
+                        input.setAttribute('contentEditable', 'false');
                         button.classList.add('disabled');
                         API.comments.external.add({
                             token: currentToken(),
@@ -245,7 +238,7 @@ class AllBoomsCommentsWidget extends HTMLElement{
                             text: inputContent,
                         }).then(({ id, timestamp }) => {
                             setInputContent('');
-                            input.disabled = false;
+                            input.setAttribute('contentEditable', '');
                             button.classList.remove('disabled');
                         })
                     } else {
@@ -254,7 +247,7 @@ class AllBoomsCommentsWidget extends HTMLElement{
                 })
             } else {
                 placeholder.innerText = dictionary.userNotLogged;
-                input.disabled = true;
+                input.setAttribute('contentEditable', 'false');
                 button.classList.add('login-highlight');
                 buttonInnerSpan.innerText = dictionary.login;
                 button.addEventListener('click', e => {
@@ -339,7 +332,8 @@ class AllBoomsCommentsWidget extends HTMLElement{
         })
     }
     listenForComments(){
-        setIntervalForAsync(this.requestComments.bind(this, true), requestTimeout)
+        const interval = new Interval.Async(this.requestComments.bind(this, true), requestTimeout);
+        interval.catch(() => this.listenForComments());
     }
 }
 

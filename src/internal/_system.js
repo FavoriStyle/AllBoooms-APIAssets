@@ -285,13 +285,3 @@ export function waitForProp(obj, prop, ...excludedValues){
         })
     })
 }
-
-export class Awaiter{
-    constructor(){
-        var resolve,
-            reject,
-            promise = new Promise((_, $) => { resolve = _; reject = $ });
-        Object.assign(promise, { resolve, reject })
-        return promise
-    }
-}

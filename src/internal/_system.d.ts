@@ -67,13 +67,3 @@ export function argsDecode(args: string): {[x: string]: string}
 export function rand(): string
 export function setImmediate<F extends Function>(func: F): void
 export function waitForProp(obj: any, prop: string | number | symbol, ...excludedValues: any[]): Promise<void>
-
-interface Awaiter<T = any> extends Promise<T>{
-    readonly resolve: (value?: T) => void
-    readonly reject: (reason?: any) => void
-}
-
-export const Awaiter: {
-    new(): Awaiter
-    prorotype: Awaiter
-}
